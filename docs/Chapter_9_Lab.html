@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="phonchi">
+<meta name="dcterms.date" content="2022-11-28">
+
+<title>Statistical Learning and Data Mining - 9&nbsp; Support Vector Machines</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./Chapter_12_Lab.html" rel="next">
+<link href="./Chapter_8_Lab.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Chapter_9_Lab.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Support Vector Machines</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistical Learning and Data Mining</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter1_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter 2_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Statistical Learning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_3_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_4_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Classification</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_5_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_6_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear Models and Regularization Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_7_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Non-linear Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_8_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Decision Trees</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_9_Lab.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Support Vector Machines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_12_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Unsupervised Learning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./NumPy_tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Numpy - multidimensional data arrays for python</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Colab_tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Introduction to Colab</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kaggle-explore.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Introduction to Kaggle</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">9.1</span> Setup</a></li>
+  <li><a href="#support-vector-classifier" id="toc-support-vector-classifier" class="nav-link" data-scroll-target="#support-vector-classifier"><span class="header-section-number">9.2</span> Support Vector Classifier</a></li>
+  <li><a href="#the-kernel-method" id="toc-the-kernel-method" class="nav-link" data-scroll-target="#the-kernel-method"><span class="header-section-number">9.3</span> The Kernel Method</a></li>
+  <li><a href="#support-vector-machine" id="toc-support-vector-machine" class="nav-link" data-scroll-target="#support-vector-machine"><span class="header-section-number">9.4</span> Support Vector Machine</a></li>
+  <li><a href="#roc-curves" id="toc-roc-curves" class="nav-link" data-scroll-target="#roc-curves"><span class="header-section-number">9.5</span> ROC Curves</a></li>
+  <li><a href="#svm-with-multiple-classes" id="toc-svm-with-multiple-classes" class="nav-link" data-scroll-target="#svm-with-multiple-classes"><span class="header-section-number">9.6</span> SVM with Multiple Classes</a></li>
+  <li><a href="#application-to-gene-expression-data" id="toc-application-to-gene-expression-data" class="nav-link" data-scroll-target="#application-to-gene-expression-data"><span class="header-section-number">9.7</span> Application to Gene Expression Data</a></li>
+  <li><a href="#sgd-classifier" id="toc-sgd-classifier" class="nav-link" data-scroll-target="#sgd-classifier"><span class="header-section-number">9.8</span> SGD Classifier</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Support Vector Machines</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>phonchi </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 28, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+
+<table align="left">
+<tbody><tr><td>
+<a href="https://colab.research.google.com/github/phonchi/nsysu-math524/blob/master/static_files/presentations/Chapter_9_Lab.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+</td>
+<td>
+<a target="_blank" href="https://kaggle.com/kernels/welcome?src=https://github.com/phonchi/nsysu-math524/blob/master/static_files/presentations/Chapter_9_Lab.ipynb"><img src="https://kaggle.com/static/images/open-in-kaggle.svg"></a>
+</td>
+
+</tr></tbody></table>
+<p><br></p>
+<section id="setup" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">9.1</span> Setup</h2>
+<p><code>SVC</code>, <code>NuSVC</code> and <code>LinearSVC</code> are classes capable of performing binary and multi-class classification on a dataset. <code>SVC</code> and <code>NuSVC</code> are similar methods, but accept slightly different sets of parameters and have different mathematical formulations. On the other hand, <code>LinearSVC</code> is another (faster) implementation of Support Vector Classification for the case of a linear kernel. Note that LinearSVC does not accept parameter kernel, as this is assumed to be linear. It also lacks some of the attributes of <code>SVC</code> and <code>NuSVC</code>, like <code>support_</code>.</p>
+<p>A <code>C</code> argument allows us to specify the cost of a violation to the margin. When the <code>C</code> argument is small, then the margins will be wide and many support vectors will be on the margin or will violate the margin. When the <code>C</code> argument is large, then the margins will be narrow and there will be few support vectors on the margin or violating the margin.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3481,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900776395,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="im">from</span> sklearn.utils <span class="im">import</span> resample</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="im">from</span> sklearn.svm <span class="im">import</span> SVC, NuSVC, LinearSVC</span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> SGDClassifier</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split, KFold, cross_val_score</span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix, roc_auc_score, mean_squared_error, roc_curve, accuracy_score</span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb1-10"><a href="#cb1-10"></a></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions</span>
+<span id="cb1-12"><a href="#cb1-12"></a></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-15"><a href="#cb1-15"></a></span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="co">#plt.style.use('seaborn-white')</span></span>
+<span id="cb1-18"><a href="#cb1-18"></a>plt.style.use(<span class="st">'seaborn'</span>) <span class="co"># pretty matplotlib plots</span></span>
+<span id="cb1-19"><a href="#cb1-19"></a>sns.set_context(<span class="st">"notebook"</span>, font_scale<span class="op">=</span><span class="fl">1.5</span>, rc<span class="op">=</span>{<span class="st">"lines.linewidth"</span>: <span class="fl">2.5</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="support-vector-classifier" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="support-vector-classifier"><span class="header-section-number">9.2</span> Support Vector Classifier</h2>
+<p>We now use the function to fit the support vector classifier for a given value of the <code>C</code> parameter. Here we demonstrate the use of this function on a two-dimensional example so that we can plot the resulting decision boundary. We begin by generating the observations, which belong to two classes, and checking whether the classes are linearly separable.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:30476,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900806868,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="b7dc1a68-8995-4ad9-c3f7-70ba2a8c5996" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
+<span id="cb2-2"><a href="#cb2-2"></a>drive.mount(<span class="st">'/content/drive'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mounted at /content/drive</code></pre>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1091,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900807953,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="b2ae2aaf-4db3-43a7-cf6e-13f22bd33087" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Generating random data: 20 observations of 2 features and divide into two classes.</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>np.random.seed(<span class="dv">5</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>X <span class="op">=</span> np.random.randn(<span class="dv">20</span>,<span class="dv">2</span>)</span>
+<span id="cb4-4"><a href="#cb4-4"></a>y <span class="op">=</span> np.repeat([<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>], <span class="dv">10</span>)</span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a>X[y <span class="op">==</span> <span class="dv">1</span>, :] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], s<span class="op">=</span><span class="dv">70</span>, c<span class="op">=</span>y, cmap<span class="op">=</span>plt.cm.Paired)</span>
+<span id="cb4-8"><a href="#cb4-8"></a>plt.xlabel(<span class="st">'X1'</span>)</span>
+<span id="cb4-9"><a href="#cb4-9"></a>plt.ylabel(<span class="st">'X2'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>Text(0, 0.5, 'X2')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-4-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900807953,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="8346fbdc-8fb5-402f-8e0d-a87ccaf7d885" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a>svc_clf <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>, C<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb6-2"><a href="#cb6-2"></a>svc_clf.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>SVC(C=10, kernel='linear')</code></pre>
+</div>
+</div>
+<p>The region of feature space that will be assigned to the −1 class is shown in light blue, and the region that will be assigned to the +1 class is shown in brown. The decision boundary between the two classes is linear (because we used the argument <code>kernel="linear</code>).</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1064,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900809015,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="c1e4ab95-beca-4d3a-c0aa-14d92e837fe1" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a>plot_decision_regions(X, y, clf<span class="op">=</span>svc_clf, X_highlight<span class="op">=</span>svc_clf.support_vectors_, legend<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="bu">print</span>(<span class="st">'Number of support vectors: '</span>, svc_clf.support_.shape[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of support vectors:  13</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-6-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We see here that there are 13 support vectors. We can determine their identities as follows:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900812496,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="e9335ae9-9cf2-48cd-c0b9-2a4b68235de0" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># get support vectors</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>pd.DataFrame(svc_clf.support_vectors_, index<span class="op">=</span>svc_clf.support_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+
+  <div id="df-fce1ed1c-fad2-4758-ae18-90bffb754e5a">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0.441227</td>
+<td>-0.330870</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2.430771</td>
+<td>-0.252092</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.109610</td>
+<td>1.582481</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.187603</td>
+<td>-0.329870</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>-0.358829</td>
+<td>0.603472</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>1.151391</td>
+<td>1.857331</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>0.019392</td>
+<td>0.143147</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>0.128121</td>
+<td>0.577492</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>1.059144</td>
+<td>0.636689</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>1.003289</td>
+<td>0.894070</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>1.793053</td>
+<td>0.368428</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">16</td>
+<td>0.993805</td>
+<td>0.898932</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17</td>
+<td>0.947692</td>
+<td>1.249218</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-fce1ed1c-fad2-4758-ae18-90bffb754e5a')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-fce1ed1c-fad2-4758-ae18-90bffb754e5a button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-fce1ed1c-fad2-4758-ae18-90bffb754e5a');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900813883,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="bf619930-e735-495a-e07d-32d91d3cabc5" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># get indices of support vectors</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>svc_clf.support_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>array([ 0,  1,  2,  4,  6,  8, 10, 11, 13, 14, 15, 16, 17], dtype=int32)</code></pre>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900814653,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="f38b3965-d268-4792-8e44-db55c48b4bb8" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># get number of support vectors for each class</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>svc_clf.n_support_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>array([6, 7], dtype=int32)</code></pre>
+</div>
+</div>
+<p>What if we instead used a smaller value of the <code>C</code> parameter?</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:374,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900815406,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="955d8cc0-76a9-400f-a019-06158ef3292f" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a>svc_clf2 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>, C<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a>svc_clf2.fit(X, y)</span>
+<span id="cb16-3"><a href="#cb16-3"></a></span>
+<span id="cb16-4"><a href="#cb16-4"></a>plot_decision_regions(X, y, clf<span class="op">=</span>svc_clf2, X_highlight<span class="op">=</span>svc_clf2.support_vectors_)</span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="bu">print</span>(<span class="st">'Number of support vectors: '</span>, svc_clf2.support_.shape[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of support vectors:  16</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-10-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now that a smaller value of the <code>C</code> parameter is being used, we obtain a larger number of support vectors, because the margin is now <strong>wider</strong>.</p>
+<p>We now perform CV to determine the optimal value of <code>C</code>:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:6,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900815406,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="f8ef7f34-086d-424b-f712-9199af5e6dc4" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>k <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a>kf5 <span class="op">=</span> KFold(n_splits<span class="op">=</span>k, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="#cb19-3"></a></span>
+<span id="cb19-4"><a href="#cb19-4"></a>svc_clf3 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>)</span>
+<span id="cb19-5"><a href="#cb19-5"></a>c_space <span class="op">=</span> np.array([<span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">100</span>])</span>
+<span id="cb19-6"><a href="#cb19-6"></a>param_grid <span class="op">=</span> {<span class="st">'C'</span>: c_space}</span>
+<span id="cb19-7"><a href="#cb19-7"></a></span>
+<span id="cb19-8"><a href="#cb19-8"></a>tune <span class="op">=</span> GridSearchCV(svc_clf3, param_grid, cv<span class="op">=</span>kf5)</span>
+<span id="cb19-9"><a href="#cb19-9"></a>tune.fit(X, y)</span>
+<span id="cb19-10"><a href="#cb19-10"></a></span>
+<span id="cb19-11"><a href="#cb19-11"></a><span class="bu">print</span>(tune.best_params_)</span>
+<span id="cb19-12"><a href="#cb19-12"></a>pd.DataFrame(tune.cv_results_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'C': 0.1}</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+
+  <div id="df-0dc940cf-284a-45f7-97bb-5c222948507c">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean_fit_time</th>
+<th data-quarto-table-cell-role="th">std_fit_time</th>
+<th data-quarto-table-cell-role="th">mean_score_time</th>
+<th data-quarto-table-cell-role="th">std_score_time</th>
+<th data-quarto-table-cell-role="th">param_C</th>
+<th data-quarto-table-cell-role="th">params</th>
+<th data-quarto-table-cell-role="th">split0_test_score</th>
+<th data-quarto-table-cell-role="th">split1_test_score</th>
+<th data-quarto-table-cell-role="th">split2_test_score</th>
+<th data-quarto-table-cell-role="th">split3_test_score</th>
+<th data-quarto-table-cell-role="th">split4_test_score</th>
+<th data-quarto-table-cell-role="th">mean_test_score</th>
+<th data-quarto-table-cell-role="th">std_test_score</th>
+<th data-quarto-table-cell-role="th">rank_test_score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0.000982</td>
+<td>0.000299</td>
+<td>0.000763</td>
+<td>0.000544</td>
+<td>0.001</td>
+<td>{'C': 0.001}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.25</td>
+<td>0.25</td>
+<td>0.75</td>
+<td>0.55</td>
+<td>0.244949</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0.000736</td>
+<td>0.000125</td>
+<td>0.000371</td>
+<td>0.000064</td>
+<td>0.01</td>
+<td>{'C': 0.01}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.25</td>
+<td>0.25</td>
+<td>0.75</td>
+<td>0.55</td>
+<td>0.244949</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.000595</td>
+<td>0.000018</td>
+<td>0.000331</td>
+<td>0.000020</td>
+<td>0.1</td>
+<td>{'C': 0.1}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>1.00</td>
+<td>0.50</td>
+<td>0.75</td>
+<td>0.158114</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0.000583</td>
+<td>0.000026</td>
+<td>0.000328</td>
+<td>0.000016</td>
+<td>1.0</td>
+<td>{'C': 1.0}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.50</td>
+<td>1.00</td>
+<td>0.50</td>
+<td>0.70</td>
+<td>0.187083</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.000604</td>
+<td>0.000034</td>
+<td>0.000342</td>
+<td>0.000028</td>
+<td>5.0</td>
+<td>{'C': 5.0}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.50</td>
+<td>1.00</td>
+<td>0.50</td>
+<td>0.70</td>
+<td>0.187083</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>0.000690</td>
+<td>0.000087</td>
+<td>0.000394</td>
+<td>0.000139</td>
+<td>10.0</td>
+<td>{'C': 10.0}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.50</td>
+<td>1.00</td>
+<td>0.50</td>
+<td>0.70</td>
+<td>0.187083</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>0.000700</td>
+<td>0.000021</td>
+<td>0.000340</td>
+<td>0.000011</td>
+<td>100.0</td>
+<td>{'C': 100.0}</td>
+<td>0.75</td>
+<td>0.75</td>
+<td>0.50</td>
+<td>0.50</td>
+<td>0.50</td>
+<td>0.60</td>
+<td>0.122474</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-0dc940cf-284a-45f7-97bb-5c222948507c')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-0dc940cf-284a-45f7-97bb-5c222948507c button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-0dc940cf-284a-45f7-97bb-5c222948507c');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p><code>C=0.1</code> is best according to <code>GridSearchCV</code>.</p>
+<p>As usual, the <code>predict()</code> function can be used to predict the class label on a set of test observations, at any given value of the <code>C</code> parameter. Let’s generate a test data set:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900817247,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a>np.random.seed(<span class="dv">1</span>)</span>
+<span id="cb21-2"><a href="#cb21-2"></a>X_test <span class="op">=</span> np.random.randn(<span class="dv">20</span>,<span class="dv">2</span>)</span>
+<span id="cb21-3"><a href="#cb21-3"></a>y_test <span class="op">=</span> resample(np.concatenate((np.ones(<span class="dv">10</span>, dtype<span class="op">=</span>np.int64)<span class="op">*-</span><span class="dv">1</span>, np.ones(<span class="dv">10</span>, dtype<span class="op">=</span>np.int64))),</span>
+<span id="cb21-4"><a href="#cb21-4"></a>                  replace<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-5"><a href="#cb21-5"></a>                  n_samples<span class="op">=</span><span class="dv">20</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb21-6"><a href="#cb21-6"></a>X_test[y_test <span class="op">==</span> <span class="dv">1</span>, :] <span class="op">+=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900817578,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="b4c98607-397b-494b-a1ae-8a3a5cce075a" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1"></a>y_pred <span class="op">=</span> tune.predict(X_test)</span>
+<span id="cb22-2"><a href="#cb22-2"></a>pd.DataFrame(confusion_matrix(y_test, y_pred), index<span class="op">=</span>tune.classes_, columns<span class="op">=</span>tune.classes_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+
+  <div id="df-131d567b-b1d7-408d-b147-85259074f98a">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">-1</th>
+<th data-quarto-table-cell-role="th">1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">-1</td>
+<td>7</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-131d567b-b1d7-408d-b147-85259074f98a')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-131d567b-b1d7-408d-b147-85259074f98a button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-131d567b-b1d7-408d-b147-85259074f98a');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>Thus, with this value of <code>C</code>, 17 of the test observations are correctly classified. What if we had instead used <code>C = 10</code>?</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900818540,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="f1440f9b-336f-49bd-e06c-3500b53985a0" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a>svc_clf4 <span class="op">=</span> SVC(C<span class="op">=</span><span class="dv">10</span>, kernel<span class="op">=</span><span class="st">'linear'</span>)</span>
+<span id="cb23-2"><a href="#cb23-2"></a>svc_clf4.fit(X, y)</span>
+<span id="cb23-3"><a href="#cb23-3"></a>y_pred <span class="op">=</span> svc_clf4.predict(X_test)</span>
+<span id="cb23-4"><a href="#cb23-4"></a>pd.DataFrame(confusion_matrix(y_test, y_pred), index<span class="op">=</span>svc_clf4.classes_, columns<span class="op">=</span>svc_clf4.classes_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+
+  <div id="df-ba8b092a-b79b-4904-ad54-9bdae058c458">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">-1</th>
+<th data-quarto-table-cell-role="th">1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">-1</td>
+<td>7</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-ba8b092a-b79b-4904-ad54-9bdae058c458')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-ba8b092a-b79b-4904-ad54-9bdae058c458 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-ba8b092a-b79b-4904-ad54-9bdae058c458');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>In this case three additional observations are misclassified.</p>
+<p>Now consider a situation in which the two classes are linearly separable. Then we can find a separating hyperplane using the <code>SVC()</code> function. We first further separate the two classes in our simulated data so that they are linearly separable:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:498,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900819591,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="e8dff176-bf1d-4c54-8ff5-a716bba947d5" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a>X[y <span class="op">==</span> <span class="dv">1</span>, :] <span class="op">+=</span> <span class="fl">1.6</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>(y<span class="op">+</span><span class="dv">5</span>)<span class="op">/</span><span class="dv">2</span>, cmap<span class="op">=</span><span class="st">'Spectral'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>&lt;matplotlib.collections.PathCollection at 0x7fdd359cafd0&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-15-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now the observations are <strong>just barely linearly</strong> separable. We fit the support vector classifier and plot the resulting hyperplane, using a very large value of <code>C</code> so that no observations are misclassified.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:558,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900820147,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="9478f031-3574-41ae-ea2f-0c6355f334de" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1"></a>svc_clf5 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>, C<span class="op">=</span><span class="fl">1e5</span>)</span>
+<span id="cb26-2"><a href="#cb26-2"></a>svc_clf5 .fit(X, y)</span>
+<span id="cb26-3"><a href="#cb26-3"></a></span>
+<span id="cb26-4"><a href="#cb26-4"></a>plot_decision_regions(X, y, clf<span class="op">=</span>svc_clf5, X_highlight<span class="op">=</span>svc_clf5.support_vectors_)</span>
+<span id="cb26-5"><a href="#cb26-5"></a><span class="bu">print</span>(<span class="st">'Number of support vectors: '</span>, svc_clf5.support_.shape[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of support vectors:  3</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-16-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>No training errors were made and only three support vectors were used. However, we can see from the figure that the margin is very narrow (because the observations that are <strong>not</strong> support vectors, indicated as circles, are very close to the decision boundary). It seems likely that this model will perform poorly on test data. Let’s try a smaller value of <code>C</code>:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900820647,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="fdb96c94-10ae-4044-9280-a00a2a096917" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1"></a>svc_clf6 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>, C<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb29-2"><a href="#cb29-2"></a>svc_clf6.fit(X, y)</span>
+<span id="cb29-3"><a href="#cb29-3"></a></span>
+<span id="cb29-4"><a href="#cb29-4"></a>plot_decision_regions(X, y, clf<span class="op">=</span>svc_clf6, X_highlight<span class="op">=</span>svc_clf6.support_vectors_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fdd3583ef10&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-17-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Using <code>C=1</code>, we misclassify a training observation, but we also obtain a much wider margin and make use of five support vectors. It seems likely that this model will perform better on test data than the model with <code>C</code>.</p>
+</section>
+<section id="the-kernel-method" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="the-kernel-method"><span class="header-section-number">9.3</span> The Kernel Method</h2>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900821265,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_circles</span>
+<span id="cb32-2"><a href="#cb32-2"></a></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="kw">def</span> feature_map_1(X):  </span>
+<span id="cb32-4"><a href="#cb32-4"></a>    <span class="cf">return</span> np.asarray((np.sqrt(<span class="dv">2</span>)<span class="op">*</span>X[:,<span class="dv">0</span>]<span class="op">*</span>X[:,<span class="dv">1</span>], X[:,<span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span>, X[:,<span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>)).T</span>
+<span id="cb32-5"><a href="#cb32-5"></a></span>
+<span id="cb32-6"><a href="#cb32-6"></a><span class="kw">def</span> my_kernel_1(X,Y):</span>
+<span id="cb32-7"><a href="#cb32-7"></a>    <span class="cf">return</span> np.dot(feature_map_1(X),feature_map_1(Y).T )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1487,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900825186,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="c9c5d333-b683-4adb-dc14-c345a4a58832" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1"></a><span class="co">## Reference https://xavierbourretsicotte.github.io/Kernel_feature_map.html</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a></span>
+<span id="cb33-3"><a href="#cb33-3"></a>X, y <span class="op">=</span> make_circles(<span class="dv">100</span>, factor<span class="op">=</span><span class="fl">.1</span>, noise<span class="op">=</span><span class="fl">.1</span>, random_state <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb33-4"><a href="#cb33-4"></a>Z <span class="op">=</span> feature_map_1(X)</span>
+<span id="cb33-5"><a href="#cb33-5"></a></span>
+<span id="cb33-6"><a href="#cb33-6"></a><span class="co">#2D scatter plot</span></span>
+<span id="cb33-7"><a href="#cb33-7"></a>fig <span class="op">=</span> plt.figure(figsize <span class="op">=</span> (<span class="dv">16</span>,<span class="dv">8</span>))</span>
+<span id="cb33-8"><a href="#cb33-8"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb33-9"><a href="#cb33-9"></a>ax.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y, cmap <span class="op">=</span> <span class="st">'viridis'</span>)</span>
+<span id="cb33-10"><a href="#cb33-10"></a>ax.set_xlabel(<span class="st">'$x_1$'</span>)</span>
+<span id="cb33-11"><a href="#cb33-11"></a>ax.set_ylabel(<span class="st">'$x_2$'</span>)</span>
+<span id="cb33-12"><a href="#cb33-12"></a>ax.set_title(<span class="st">'Original data'</span>)</span>
+<span id="cb33-13"><a href="#cb33-13"></a></span>
+<span id="cb33-14"><a href="#cb33-14"></a><span class="co">#3D scatter plot</span></span>
+<span id="cb33-15"><a href="#cb33-15"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb33-16"><a href="#cb33-16"></a>ax.scatter3D(Z[:,<span class="dv">0</span>],Z[:,<span class="dv">1</span>], Z[:,<span class="dv">2</span>],c <span class="op">=</span> y, cmap <span class="op">=</span> <span class="st">'viridis'</span> ) <span class="co">#,rstride = 5, cstride = 5, cmap = 'jet', alpha = .4, edgecolor = 'none' )</span></span>
+<span id="cb33-17"><a href="#cb33-17"></a>ax.set_xlabel(<span class="st">'$z_1$'</span>)</span>
+<span id="cb33-18"><a href="#cb33-18"></a>ax.set_ylabel(<span class="st">'$z_2$'</span>)</span>
+<span id="cb33-19"><a href="#cb33-19"></a>ax.set_zlabel(<span class="st">'$z_3$'</span>)</span>
+<span id="cb33-20"><a href="#cb33-20"></a>ax.set_title(<span class="st">'Transformed data: '</span>)</span>
+<span id="cb33-21"><a href="#cb33-21"></a></span>
+<span id="cb33-22"><a href="#cb33-22"></a><span class="co">#SVM using linear kernel with feature map 1</span></span>
+<span id="cb33-23"><a href="#cb33-23"></a>clf <span class="op">=</span> SVC(C <span class="op">=</span> <span class="dv">1</span>, kernel <span class="op">=</span> <span class="st">'linear'</span>)</span>
+<span id="cb33-24"><a href="#cb33-24"></a>clf.fit(Z, y) </span>
+<span id="cb33-25"><a href="#cb33-25"></a></span>
+<span id="cb33-26"><a href="#cb33-26"></a>w <span class="op">=</span> clf.coef_.flatten()</span>
+<span id="cb33-27"><a href="#cb33-27"></a>b <span class="op">=</span> clf.intercept_.flatten()</span>
+<span id="cb33-28"><a href="#cb33-28"></a><span class="bu">print</span>(<span class="st">'w='</span>,w,<span class="st">'b='</span>,b)</span>
+<span id="cb33-29"><a href="#cb33-29"></a></span>
+<span id="cb33-30"><a href="#cb33-30"></a><span class="co"># create x,y</span></span>
+<span id="cb33-31"><a href="#cb33-31"></a>xx, yy <span class="op">=</span> np.meshgrid(np.linspace(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>), np.linspace(<span class="dv">0</span>,<span class="dv">1</span>))</span>
+<span id="cb33-32"><a href="#cb33-32"></a></span>
+<span id="cb33-33"><a href="#cb33-33"></a><span class="co"># calculate corresponding z</span></span>
+<span id="cb33-34"><a href="#cb33-34"></a><span class="co"># The equation of the separating plane is given by all x in R^3 such that:</span></span>
+<span id="cb33-35"><a href="#cb33-35"></a><span class="co"># np.dot(w, x) + b = 0. We should solve for the last coordinate</span></span>
+<span id="cb33-36"><a href="#cb33-36"></a>boundary <span class="op">=</span> (<span class="op">-</span>w[<span class="dv">0</span>] <span class="op">*</span> xx <span class="op">-</span> w[<span class="dv">1</span>] <span class="op">*</span> yy <span class="op">-</span> b) <span class="op">*</span> <span class="fl">1.</span> <span class="op">/</span>w[<span class="dv">2</span>]</span>
+<span id="cb33-37"><a href="#cb33-37"></a></span>
+<span id="cb33-38"><a href="#cb33-38"></a></span>
+<span id="cb33-39"><a href="#cb33-39"></a><span class="co"># plot the surface</span></span>
+<span id="cb33-40"><a href="#cb33-40"></a></span>
+<span id="cb33-41"><a href="#cb33-41"></a>ax.plot_surface(xx, yy, boundary, alpha <span class="op">=</span> <span class="fl">.3</span>)</span>
+<span id="cb33-42"><a href="#cb33-42"></a>ax.set_ylim(<span class="fl">.2</span>,<span class="fl">1.2</span>)</span>
+<span id="cb33-43"><a href="#cb33-43"></a>ax.set_zlim(<span class="op">-</span><span class="fl">.9</span>,<span class="fl">1.1</span>)</span>
+<span id="cb33-44"><a href="#cb33-44"></a><span class="co">#ax.view_init(0, 260)</span></span>
+<span id="cb33-45"><a href="#cb33-45"></a></span>
+<span id="cb33-46"><a href="#cb33-46"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>w= [-0.05481854 -2.53191791 -2.52028513] b= [1.14976292]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-19-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900825187,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="75f75871-07ab-4253-dc3f-7e88eede9219" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1"></a><span class="co">#SVM using kernel 1 - feature map 1</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a>clf2 <span class="op">=</span> SVC(kernel<span class="op">=</span>my_kernel_1)</span>
+<span id="cb35-3"><a href="#cb35-3"></a>clf2.fit(X, y) </span>
+<span id="cb35-4"><a href="#cb35-4"></a></span>
+<span id="cb35-5"><a href="#cb35-5"></a><span class="co"># predict on training examples - print accuracy score</span></span>
+<span id="cb35-6"><a href="#cb35-6"></a><span class="bu">print</span>(<span class="st">'Accuracy score using feature map '</span>,accuracy_score(y, clf2.predict(X)))</span>
+<span id="cb35-7"><a href="#cb35-7"></a><span class="bu">print</span>(<span class="st">'Accuracy score using feature map '</span>,accuracy_score(y, clf.predict(Z)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy score using feature map  1.0
+Accuracy score using feature map  1.0</code></pre>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:5,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900825893,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="f899aeef-ed20-43b8-ad33-53fd36cce068" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1"></a><span class="co">#Initialize data</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a>h <span class="op">=</span> <span class="fl">.01</span> <span class="co">#Stepsize in the mesh</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a>x_min, x_max <span class="op">=</span> X[:, <span class="dv">0</span>].<span class="bu">min</span>() <span class="op">-</span> <span class="fl">.5</span>, X[:, <span class="dv">0</span>].<span class="bu">max</span>() <span class="op">+</span> <span class="fl">.5</span></span>
+<span id="cb37-4"><a href="#cb37-4"></a>y_min, y_max <span class="op">=</span> X[:, <span class="dv">1</span>].<span class="bu">min</span>() <span class="op">-</span> <span class="fl">.5</span>, X[:, <span class="dv">1</span>].<span class="bu">max</span>() <span class="op">+</span> <span class="fl">.5</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a>xx, yy <span class="op">=</span> np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))</span>
+<span id="cb37-6"><a href="#cb37-6"></a></span>
+<span id="cb37-7"><a href="#cb37-7"></a><span class="co"># Predict on meshgrid</span></span>
+<span id="cb37-8"><a href="#cb37-8"></a>Z <span class="op">=</span> clf2.predict(np.c_[xx.ravel(), yy.ravel()])</span>
+<span id="cb37-9"><a href="#cb37-9"></a></span>
+<span id="cb37-10"><a href="#cb37-10"></a><span class="co"># Put the result into a color plot</span></span>
+<span id="cb37-11"><a href="#cb37-11"></a>Z <span class="op">=</span> Z.reshape(xx.shape)</span>
+<span id="cb37-12"><a href="#cb37-12"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">7</span>,<span class="dv">7</span>))</span>
+<span id="cb37-13"><a href="#cb37-13"></a>plt.contourf(xx, yy, Z, <span class="dv">1</span>, colors <span class="op">=</span> [<span class="st">'darkblue'</span>,<span class="st">'yellow'</span>], alpha <span class="op">=</span> <span class="fl">.1</span>) <span class="co"># plot coutour surface</span></span>
+<span id="cb37-14"><a href="#cb37-14"></a>plt.contour(xx, yy, Z, cmap <span class="op">=</span> <span class="st">'viridis'</span>) <span class="co"># plot coutour line</span></span>
+<span id="cb37-15"><a href="#cb37-15"></a></span>
+<span id="cb37-16"><a href="#cb37-16"></a><span class="co"># Plot also the training points</span></span>
+<span id="cb37-17"><a href="#cb37-17"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>y, cmap<span class="op">=</span><span class="st">'viridis'</span>, edgecolors <span class="op">=</span> <span class="st">'k'</span>)</span>
+<span id="cb37-18"><a href="#cb37-18"></a>plt.title(<span class="st">'Support Vector Machine with polynomial'</span></span>
+<span id="cb37-19"><a href="#cb37-19"></a>          <span class="st">' kernel'</span>)</span>
+<span id="cb37-20"><a href="#cb37-20"></a>plt.xlabel(<span class="st">'$x_1$'</span>)</span>
+<span id="cb37-21"><a href="#cb37-21"></a>plt.ylabel(<span class="st">'$x_2$'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>Text(0, 0.5, '$x_2$')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-21-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="support-vector-machine" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="support-vector-machine"><span class="header-section-number">9.4</span> Support Vector Machine</h2>
+<p>In order to fit an SVM using a <strong>non-linear kernel</strong>, we once again use the <code>SVC()</code> function. However, now we use a different value of the parameter kernel. To fit an SVM with a polynomial kernel we use <code>kernel="poly"</code>, and to fit an SVM with a radial kernel we use <code>kernel="rbf"</code>. In the former case we also use the <code>degree</code> argument to specify a degree for the polynomial kernel, and in the latter case we use <span class="math inline">\(\gamma\)</span> to specify a value of <span class="math inline">\(\gamma\)</span> for the radial basis kernel.</p>
+<p>Let’s generate some data with a non-linear class boundary:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:5,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900825894,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="aa801c68-16ec-4051-9ba4-d2b870a93c22" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb39-2"><a href="#cb39-2"></a></span>
+<span id="cb39-3"><a href="#cb39-3"></a>X <span class="op">=</span> np.random.normal(size<span class="op">=</span><span class="dv">400</span>).reshape(<span class="dv">200</span>, <span class="dv">2</span>)</span>
+<span id="cb39-4"><a href="#cb39-4"></a>X[<span class="dv">0</span>:<span class="dv">100</span>, :] <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb39-5"><a href="#cb39-5"></a>X[<span class="dv">100</span>:<span class="dv">150</span>, :] <span class="op">-=</span> <span class="dv">2</span></span>
+<span id="cb39-6"><a href="#cb39-6"></a>y <span class="op">=</span> np.concatenate((np.full(<span class="dv">150</span>, <span class="op">-</span><span class="dv">1</span>, dtype<span class="op">=</span>np.int64), np.full(<span class="dv">50</span>, <span class="dv">1</span>, dtype<span class="op">=</span>np.int64)))</span>
+<span id="cb39-7"><a href="#cb39-7"></a></span>
+<span id="cb39-8"><a href="#cb39-8"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>y, cmap<span class="op">=</span><span class="st">'Spectral'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>&lt;matplotlib.collections.PathCollection at 0x7fdd32464b50&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-22-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900826321,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, train_size<span class="op">=</span><span class="fl">0.5</span>, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>See how one class is kind of stuck in the middle of another class? This suggests that we might want to use a <strong>radial kernel</strong> in our SVM. Now let’s fit the training data using the <code>SVC()</code> function with a radial kernel and <span class="math inline">\(\gamma = 1\)</span>:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1513,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900827831,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="79056278-a582-4fa5-c611-44c059ad1332" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1"></a>svm <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>, gamma<span class="op">=</span><span class="dv">1</span>, C<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb42-2"><a href="#cb42-2"></a>svm.fit(X_train, y_train)</span>
+<span id="cb42-3"><a href="#cb42-3"></a></span>
+<span id="cb42-4"><a href="#cb42-4"></a>plot_decision_regions(X_train, y_train, clf<span class="op">=</span>svm, X_highlight<span class="op">=</span>svm.support_vectors_)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-24-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Not too shabby! The plot shows that the resulting SVM has a decidedly non-linear boundary. We can see from the figure that there are a fair number of training errors in this SVM fit. If we increase the value of <code>C</code>, we can reduce the number of training errors:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:498,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900828627,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="931ca68a-d24e-4efd-b8f4-e77df4a8d07d" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1"></a>svm2 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>, gamma<span class="op">=</span><span class="dv">1</span>, C<span class="op">=</span><span class="fl">1e5</span>)</span>
+<span id="cb44-2"><a href="#cb44-2"></a>svm2.fit(X_train, y_train)</span>
+<span id="cb44-3"><a href="#cb44-3"></a></span>
+<span id="cb44-4"><a href="#cb44-4"></a>plot_decision_regions(X_train, y_train, clf<span class="op">=</span>svm2, X_highlight<span class="op">=</span>svm2.support_vectors_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fdd32506a90&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-25-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>However, this comes at the price of a more irregular decision boundary that seems to be at risk of overfitting the data. We can perform cross-validation using <code>GridSearchCV()</code> to select the best choice of <span class="math inline">\(\gamma\)</span> and cost for an SVM with a radial kernel:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1078,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900830087,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="42884dc8-bc90-47d4-f473-14264ed0c7bf" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1"></a>svm3 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>)</span>
+<span id="cb47-2"><a href="#cb47-2"></a>c_space <span class="op">=</span> np.array([<span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">100</span>, <span class="dv">1000</span>])</span>
+<span id="cb47-3"><a href="#cb47-3"></a>g_space <span class="op">=</span> np.array([<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>])</span>
+<span id="cb47-4"><a href="#cb47-4"></a>param_grid <span class="op">=</span> {<span class="st">'C'</span>: c_space, <span class="st">'gamma'</span>: g_space}</span>
+<span id="cb47-5"><a href="#cb47-5"></a></span>
+<span id="cb47-6"><a href="#cb47-6"></a>tune <span class="op">=</span> GridSearchCV(svm3, param_grid, cv<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb47-7"><a href="#cb47-7"></a>tune.fit(X_train, y_train)</span>
+<span id="cb47-8"><a href="#cb47-8"></a></span>
+<span id="cb47-9"><a href="#cb47-9"></a>tune.cv_results_</span>
+<span id="cb47-10"><a href="#cb47-10"></a>tune.best_params_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>{'C': 1.0, 'gamma': 0.5}</code></pre>
+</div>
+</div>
+<p>Therefore, the best choice of parameters involves <code>C=1</code> and <code>gamma=0.5</code>. We can view the test set predictions for this model by applying the <code>predict()</code> function to the test data:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900830362,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="ac937080-78d2-4f26-b5e1-a940cf23d55c" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1"></a>y_pred <span class="op">=</span> tune.predict(X_test)</span>
+<span id="cb49-2"><a href="#cb49-2"></a>pd.DataFrame(confusion_matrix(y_test, y_pred), index<span class="op">=</span>tune.classes_, columns<span class="op">=</span>tune.classes_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+
+  <div id="df-618859ea-de4f-411a-a0a4-0e95acaadf4b">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">-1</th>
+<th data-quarto-table-cell-role="th">1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">-1</td>
+<td>67</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>9</td>
+<td>21</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-618859ea-de4f-411a-a0a4-0e95acaadf4b')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-618859ea-de4f-411a-a0a4-0e95acaadf4b button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-618859ea-de4f-411a-a0a4-0e95acaadf4b');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p><span class="math inline">\(12\,\%\)</span> of test observations are misclassified by this SVM.</p>
+</section>
+<section id="roc-curves" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="roc-curves"><span class="header-section-number">9.5</span> ROC Curves</h2>
+<p>The <code>roc_curve</code> and <code>auc()</code> function from the <code>sklearn.metrics</code> package can be used to produce ROC curves such as those we saw in lecture:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:1,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900834467,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1"></a><span class="kw">def</span> plot_roc(cls,X,y,title):</span>
+<span id="cb50-2"><a href="#cb50-2"></a>    probs <span class="op">=</span> cls.predict_proba(X)[:,<span class="dv">1</span>]</span>
+<span id="cb50-3"><a href="#cb50-3"></a>    fpr, tpr, _ <span class="op">=</span> roc_curve(y,probs)</span>
+<span id="cb50-4"><a href="#cb50-4"></a>    auc <span class="op">=</span> roc_auc_score(y,probs)</span>
+<span id="cb50-5"><a href="#cb50-5"></a>    </span>
+<span id="cb50-6"><a href="#cb50-6"></a>    plt.figure(figsize <span class="op">=</span> (<span class="dv">6</span>,<span class="dv">6</span>))</span>
+<span id="cb50-7"><a href="#cb50-7"></a>    plt.plot(fpr,tpr,label<span class="op">=</span><span class="st">"auc="</span><span class="op">+</span><span class="bu">str</span>(auc)[<span class="dv">0</span>:<span class="dv">4</span>],c <span class="op">=</span> <span class="st">'r'</span>)</span>
+<span id="cb50-8"><a href="#cb50-8"></a>    plt.plot([<span class="dv">0</span>,<span class="dv">1</span>],[<span class="dv">0</span>,<span class="dv">1</span>],alpha <span class="op">=</span> <span class="fl">0.1</span>,c <span class="op">=</span> <span class="st">'b'</span>)</span>
+<span id="cb50-9"><a href="#cb50-9"></a>    plt.xlabel(<span class="st">'False Positive Rate'</span>)</span>
+<span id="cb50-10"><a href="#cb50-10"></a>    plt.ylabel(<span class="st">'True Positive Rate'</span>)</span>
+<span id="cb50-11"><a href="#cb50-11"></a>    plt.title(title)</span>
+<span id="cb50-12"><a href="#cb50-12"></a>    plt.legend(loc<span class="op">=</span><span class="st">"lower right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>SVMs and support vector classifiers output class labels for each observation. However, it is also possible to obtain <em>fitted values</em> for each observation, which are the numerical scores used to obtain the class labels. For instance, in the case of a support vector classifier, the fitted value for an observation <span class="math inline">\(X= (X_1, X_2, \ldots, X_p)^T\)</span> takes the form <span class="math inline">\(\hat{\beta}_0 + \hat{\beta}_1 X_1 + \hat{\beta}_2 X_2 + \cdots + \hat{\beta}_p X_p\)</span>. For an SVM with a non-linear kernel, the equation that yields the fitted value is given in (9.23). In essence, the sign of the fitted value determines on which side of the decision boundary the observation lies. Therefore, the relationship between the fitted value and the class prediction for a given observation is simple: if the fitted value exceeds zero then the observation is assigned to one class, and if it is less than zero then it is assigned to the other. Then the <code>predict()</code> function will output the fitted values.</p>
+<p>Let’s start by fitting two models, one more flexible than the other:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:552,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900836605,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="2bcf253f-17c2-4c80-adca-8a2cfa4fa0e6" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1"></a><span class="co"># More constrained model</span></span>
+<span id="cb51-2"><a href="#cb51-2"></a>svm4 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>, gamma<span class="op">=</span><span class="dv">2</span>, C<span class="op">=</span><span class="dv">1</span>, probability<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb51-3"><a href="#cb51-3"></a>svm4.fit(X_train, y_train)</span>
+<span id="cb51-4"><a href="#cb51-4"></a></span>
+<span id="cb51-5"><a href="#cb51-5"></a><span class="co"># More flexible model</span></span>
+<span id="cb51-6"><a href="#cb51-6"></a>svm5 <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>, gamma<span class="op">=</span><span class="dv">50</span>, C<span class="op">=</span><span class="dv">1</span>, probability<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb51-7"><a href="#cb51-7"></a>svm5.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>SVC(C=1, gamma=50, probability=True)</code></pre>
+</div>
+</div>
+<p>SVM appears to be producing accurate predictions. By increasing <span class="math inline">\(\gamma\)</span> we can produce a more flexible fit and generate further improvements in accuracy.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:791,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900838245,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="47d404f5-3fc1-4278-990c-0c61c4b7dd11" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1"></a>plot_roc(svm4,X_train,y_train,<span class="st">'training roc, gamma = 2'</span>)</span>
+<span id="cb53-2"><a href="#cb53-2"></a>plot_roc(svm5,X_train,y_train,<span class="st">'training roc, gamma = 50'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-30-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>However, these ROC curves are all on the training data. We are really more interested in the level of prediction accuracy on the test data. When we compute the ROC curves on the test data, the model with <span class="math inline">\(\gamma=2\)</span> appears to provide the most accurate results.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:754,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900839547,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="fdf57f1a-e97b-4c10-9e9b-a828a6f99a5f" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1"></a>plot_roc(svm4,X_test,y_test,<span class="st">'training roc, gamma = 2'</span>)</span>
+<span id="cb54-2"><a href="#cb54-2"></a>plot_roc(svm5,X_test,y_test,<span class="st">'training roc, gamma = 50'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-31-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-31-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="svm-with-multiple-classes" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="svm-with-multiple-classes"><span class="header-section-number">9.6</span> SVM with Multiple Classes</h2>
+<p>If the response is a factor containing more than two levels, then the <code>svm()</code> function will perform multi-class classification using the one-versus-all approach. We explore that setting here by generating a third class of observations.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:688,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900840527,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="d12e4adf-146f-4c99-84fd-81b639f4fabd" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1"></a>np.random.seed(<span class="dv">1</span>)</span>
+<span id="cb55-2"><a href="#cb55-2"></a></span>
+<span id="cb55-3"><a href="#cb55-3"></a>X <span class="op">=</span> np.random.normal(size<span class="op">=</span><span class="dv">400</span>).reshape(<span class="dv">200</span>, <span class="dv">2</span>)</span>
+<span id="cb55-4"><a href="#cb55-4"></a>X[<span class="dv">0</span>:<span class="dv">100</span>, :] <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb55-5"><a href="#cb55-5"></a>X[<span class="dv">100</span>:<span class="dv">150</span>, :] <span class="op">-=</span> <span class="dv">2</span></span>
+<span id="cb55-6"><a href="#cb55-6"></a>y <span class="op">=</span> np.concatenate((np.full(<span class="dv">150</span>, <span class="dv">1</span>, dtype<span class="op">=</span>np.int64), np.full(<span class="dv">50</span>, <span class="dv">2</span>, dtype<span class="op">=</span>np.int64)))</span>
+<span id="cb55-7"><a href="#cb55-7"></a></span>
+<span id="cb55-8"><a href="#cb55-8"></a>X <span class="op">=</span> np.concatenate((X, np.random.normal(size<span class="op">=</span><span class="dv">100</span>).reshape(<span class="dv">50</span>, <span class="dv">2</span>)))</span>
+<span id="cb55-9"><a href="#cb55-9"></a>y <span class="op">=</span> np.concatenate((y, np.full(<span class="dv">50</span>, <span class="dv">0</span>, dtype<span class="op">=</span>np.int64)))</span>
+<span id="cb55-10"><a href="#cb55-10"></a></span>
+<span id="cb55-11"><a href="#cb55-11"></a>X[y <span class="op">==</span> <span class="dv">0</span>, <span class="dv">1</span>] <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb55-12"><a href="#cb55-12"></a></span>
+<span id="cb55-13"><a href="#cb55-13"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>y<span class="op">+</span><span class="dv">1</span>, cmap<span class="op">=</span><span class="st">'Spectral'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We now fit an SVM to the data:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2503,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900843652,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="8ef26dc8-a292-400f-9f17-c1bfc853e0d1" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1"></a>svm_m <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'rbf'</span>, C<span class="op">=</span><span class="dv">10</span>, gamma<span class="op">=</span><span class="dv">1</span>, decision_function_shape<span class="op">=</span><span class="st">'ovr'</span>)</span>
+<span id="cb56-2"><a href="#cb56-2"></a>svm_m.fit(X, y)</span>
+<span id="cb56-3"><a href="#cb56-3"></a><span class="bu">print</span>(svm_m.score(X, y))</span>
+<span id="cb56-4"><a href="#cb56-4"></a>plot_decision_regions(X, y, clf<span class="op">=</span>svm_m, X_highlight<span class="op">=</span>svm_m.support_vectors_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.868</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:244: MatplotlibDeprecationWarning: Passing unsupported keyword arguments to axis() will raise a TypeError in 3.3.
+  ax.axis(xmin=xx.min(), xmax=xx.max(), y_min=yy.min(), y_max=yy.max())
+/usr/local/lib/python3.7/dist-packages/mlxtend/plotting/decision_regions.py:313: MatplotlibDeprecationWarning: Using a string of single character colors as a color sequence is deprecated. Use an explicit list instead.
+  **scatter_highlight_kwargs)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<pre><code>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fdd30a2e650&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-33-output-4.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="application-to-gene-expression-data" class="level2" data-number="9.7">
+<h2 data-number="9.7" class="anchored" data-anchor-id="application-to-gene-expression-data"><span class="header-section-number">9.7</span> Application to Gene Expression Data</h2>
+<p>We now examine the <code>Khan</code> data set, which consists of a number of tissue samples corresponding to four distinct types of small round blue cell tumors. For each tissue sample, gene expression measurements are available. The data set consists of training data, <code>xtrain</code> and <code>ytrain</code>, and testing data, <code>xtest</code> and <code>ytest</code>.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2054,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900893461,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1"></a>khan_X_train <span class="op">=</span> pd.read_csv(<span class="st">'/content/drive/MyDrive/Lab/Data/Khan_xtrain.csv'</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb60-2"><a href="#cb60-2"></a>khan_y_train <span class="op">=</span> pd.read_csv(<span class="st">'/content/drive/MyDrive/Lab/Data/Khan_ytrain.csv'</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb60-3"><a href="#cb60-3"></a>khan_X_test <span class="op">=</span> pd.read_csv(<span class="st">'/content/drive/MyDrive/Lab/Data/Khan_xtest.csv'</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb60-4"><a href="#cb60-4"></a>khan_y_test <span class="op">=</span> pd.read_csv(<span class="st">'/content/drive/MyDrive/Lab/Data/Khan_ytest.csv'</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We examine the dimension of the data:</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:353,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900895524,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="3bd1e72f-7fc0-47aa-f3fd-1afb6e119389" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1"></a>khan_X_train.shape, khan_X_test.shape, <span class="bu">len</span>(khan_y_train), <span class="bu">len</span>(khan_y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>((63, 2308), (20, 2308), 63, 20)</code></pre>
+</div>
+</div>
+<p>This data set consists of expression measurements for <span class="math inline">\(2{,}308\)</span> genes. The training and test sets consist of <span class="math inline">\(63\)</span> and <span class="math inline">\(20\)</span> observations respectively.</p>
+<p>We will use a support vector approach to predict cancer subtype using gene expression measurements. In this data set, there are a very large number of features relative to the number of observations. This suggests that we should use a linear kernel, because the additional flexibility that will result from using a polynomial or radial kernel is unnecessary.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900897044,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="6370198d-1f52-46c3-c9e2-1821a06059ce" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1"></a>khan_y_train.iloc[:, <span class="dv">0</span>].value_counts(sort<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<pre><code>2    23
+4    20
+3    12
+1     8
+Name: x, dtype: int64</code></pre>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900897976,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="f28c0dae-4bfe-4e96-ab16-ddccf5485eca" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1"></a>khan_y_test.iloc[:, <span class="dv">0</span>].value_counts(sort<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="38">
+<pre><code>3    6
+2    6
+4    5
+1    3
+Name: x, dtype: int64</code></pre>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900898271,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="985ba4f7-a031-447a-c047-5e0f07a452e5" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1"></a>gene_clf <span class="op">=</span> SVC(kernel<span class="op">=</span><span class="st">'linear'</span>, C<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb67-2"><a href="#cb67-2"></a>gene_clf.fit(khan_X_train, khan_y_train.iloc[:, <span class="dv">0</span>])</span>
+<span id="cb67-3"><a href="#cb67-3"></a></span>
+<span id="cb67-4"><a href="#cb67-4"></a>khan_y_train_pred <span class="op">=</span> gene_clf.predict(khan_X_train)</span>
+<span id="cb67-5"><a href="#cb67-5"></a></span>
+<span id="cb67-6"><a href="#cb67-6"></a>pd.DataFrame(confusion_matrix(khan_y_train_pred, khan_y_train), index<span class="op">=</span>gene_clf.classes_, columns<span class="op">=</span>gene_clf.classes_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="39">
+
+  <div id="df-5ae3852e-2ddd-4833-ba5d-2ed2c49903c6">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>8</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>23</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>0</td>
+<td>12</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-5ae3852e-2ddd-4833-ba5d-2ed2c49903c6')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-5ae3852e-2ddd-4833-ba5d-2ed2c49903c6 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-5ae3852e-2ddd-4833-ba5d-2ed2c49903c6');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>We see that there are <em>no</em> training errors. In fact, this is not surprising, because the large number of variables relative to the number of observations implies that it is easy to find hyperplanes that fully separate the classes. We are most interested not in the support vector classifier’s performance on the training observations, but rather its performance on the test observations.</p>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900899149,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="67ecfb93-b78e-42b1-edc7-dfa18c20bbf7" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1"></a>khan_y_test_pred <span class="op">=</span> gene_clf.predict(khan_X_test)</span>
+<span id="cb68-2"><a href="#cb68-2"></a>pd.DataFrame(confusion_matrix(khan_y_test_pred, khan_y_test), index<span class="op">=</span>gene_clf.classes_, columns<span class="op">=</span>gene_clf.classes_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="40">
+
+  <div id="df-8d0a80ff-c693-4d23-9f39-dc337f8133eb">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>6</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-8d0a80ff-c693-4d23-9f39-dc337f8133eb')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-8d0a80ff-c693-4d23-9f39-dc337f8133eb button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-8d0a80ff-c693-4d23-9f39-dc337f8133eb');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>We see that using <code>C = 10</code> yields two test set errors on this data.</p>
+</section>
+<section id="sgd-classifier" class="level2" data-number="9.8">
+<h2 data-number="9.8" class="anchored" data-anchor-id="sgd-classifier"><span class="header-section-number">9.8</span> SGD Classifier</h2>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900900652,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="b3fe8cb9-0d92-4f3a-b229-e17add69cc83" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span>
+<span id="cb69-2"><a href="#cb69-2"></a></span>
+<span id="cb69-3"><a href="#cb69-3"></a><span class="co"># we create 50 separable points</span></span>
+<span id="cb69-4"><a href="#cb69-4"></a>X, Y <span class="op">=</span> make_blobs(n_samples<span class="op">=</span><span class="dv">50</span>, centers<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">0</span>, cluster_std<span class="op">=</span><span class="fl">0.60</span>)</span>
+<span id="cb69-5"><a href="#cb69-5"></a></span>
+<span id="cb69-6"><a href="#cb69-6"></a><span class="co"># fit the model</span></span>
+<span id="cb69-7"><a href="#cb69-7"></a>clf <span class="op">=</span> SGDClassifier(loss<span class="op">=</span><span class="st">"hinge"</span>, alpha<span class="op">=</span><span class="fl">0.01</span>, max_iter<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb69-8"><a href="#cb69-8"></a></span>
+<span id="cb69-9"><a href="#cb69-9"></a>clf.fit(X, Y)</span>
+<span id="cb69-10"><a href="#cb69-10"></a></span>
+<span id="cb69-11"><a href="#cb69-11"></a><span class="co"># plot the line, the points, and the nearest vectors to the plane</span></span>
+<span id="cb69-12"><a href="#cb69-12"></a>xx <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb69-13"><a href="#cb69-13"></a>yy <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb69-14"><a href="#cb69-14"></a></span>
+<span id="cb69-15"><a href="#cb69-15"></a>X1, X2 <span class="op">=</span> np.meshgrid(xx, yy)</span>
+<span id="cb69-16"><a href="#cb69-16"></a>Z <span class="op">=</span> np.empty(X1.shape)</span>
+<span id="cb69-17"><a href="#cb69-17"></a><span class="cf">for</span> (i, j), val <span class="kw">in</span> np.ndenumerate(X1):</span>
+<span id="cb69-18"><a href="#cb69-18"></a>    x1 <span class="op">=</span> val</span>
+<span id="cb69-19"><a href="#cb69-19"></a>    x2 <span class="op">=</span> X2[i, j]</span>
+<span id="cb69-20"><a href="#cb69-20"></a>    p <span class="op">=</span> clf.decision_function([[x1, x2]])</span>
+<span id="cb69-21"><a href="#cb69-21"></a>    Z[i, j] <span class="op">=</span> p[<span class="dv">0</span>]</span>
+<span id="cb69-22"><a href="#cb69-22"></a>levels <span class="op">=</span> [<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>]</span>
+<span id="cb69-23"><a href="#cb69-23"></a>linestyles <span class="op">=</span> [<span class="st">"dashed"</span>, <span class="st">"solid"</span>, <span class="st">"dashed"</span>]</span>
+<span id="cb69-24"><a href="#cb69-24"></a>colors <span class="op">=</span> <span class="st">"k"</span></span>
+<span id="cb69-25"><a href="#cb69-25"></a>plt.contour(X1, X2, Z, levels, colors<span class="op">=</span>colors, linestyles<span class="op">=</span>linestyles)</span>
+<span id="cb69-26"><a href="#cb69-26"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>Y, cmap<span class="op">=</span>plt.cm.Paired, edgecolor<span class="op">=</span><span class="st">"black"</span>, s<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb69-27"><a href="#cb69-27"></a></span>
+<span id="cb69-28"><a href="#cb69-28"></a>plt.axis(<span class="st">"tight"</span>)</span>
+<span id="cb69-29"><a href="#cb69-29"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-40-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:652,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900901301,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="87bba229-91cf-4e32-e171-13c72590cbbe" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1"></a>np.random.seed(<span class="dv">1</span>)</span>
+<span id="cb70-2"><a href="#cb70-2"></a></span>
+<span id="cb70-3"><a href="#cb70-3"></a>X <span class="op">=</span> np.random.normal(size<span class="op">=</span><span class="dv">400</span>).reshape(<span class="dv">200</span>, <span class="dv">2</span>)</span>
+<span id="cb70-4"><a href="#cb70-4"></a>X[<span class="dv">0</span>:<span class="dv">100</span>, :] <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb70-5"><a href="#cb70-5"></a>X[<span class="dv">100</span>:<span class="dv">150</span>, :] <span class="op">-=</span> <span class="dv">2</span></span>
+<span id="cb70-6"><a href="#cb70-6"></a>y <span class="op">=</span> np.concatenate((np.full(<span class="dv">150</span>, <span class="dv">1</span>, dtype<span class="op">=</span>np.int64), np.full(<span class="dv">50</span>, <span class="dv">2</span>, dtype<span class="op">=</span>np.int64)))</span>
+<span id="cb70-7"><a href="#cb70-7"></a></span>
+<span id="cb70-8"><a href="#cb70-8"></a>X <span class="op">=</span> np.concatenate((X, np.random.normal(size<span class="op">=</span><span class="dv">100</span>).reshape(<span class="dv">50</span>, <span class="dv">2</span>)))</span>
+<span id="cb70-9"><a href="#cb70-9"></a>y <span class="op">=</span> np.concatenate((y, np.full(<span class="dv">50</span>, <span class="dv">0</span>, dtype<span class="op">=</span>np.int64)))</span>
+<span id="cb70-10"><a href="#cb70-10"></a></span>
+<span id="cb70-11"><a href="#cb70-11"></a>X[y <span class="op">==</span> <span class="dv">0</span>, <span class="dv">1</span>] <span class="op">+=</span> <span class="dv">2</span></span>
+<span id="cb70-12"><a href="#cb70-12"></a></span>
+<span id="cb70-13"><a href="#cb70-13"></a>plt.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c<span class="op">=</span>y<span class="op">+</span><span class="dv">1</span>, cmap<span class="op">=</span><span class="st">'Spectral'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_9_Lab_files/figure-html/cell-41-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-executioninfo="{&quot;elapsed&quot;:2,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1667900901672,&quot;user&quot;:{&quot;displayName&quot;:&quot;phonchi chung&quot;,&quot;userId&quot;:&quot;13517391734500420886&quot;},&quot;user_tz&quot;:-480}" data-outputid="d74548fc-b6c0-4da6-9e5b-b7c37a681df0" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1"></a><span class="im">from</span> sklearn.kernel_approximation <span class="im">import</span> RBFSampler</span>
+<span id="cb71-2"><a href="#cb71-2"></a></span>
+<span id="cb71-3"><a href="#cb71-3"></a>rbf_feature <span class="op">=</span> RBFSampler(gamma<span class="op">=</span><span class="dv">1</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb71-4"><a href="#cb71-4"></a>X_features <span class="op">=</span> rbf_feature.fit_transform(X)</span>
+<span id="cb71-5"><a href="#cb71-5"></a>clf <span class="op">=</span> SGDClassifier(loss<span class="op">=</span><span class="st">"hinge"</span>, alpha<span class="op">=</span><span class="fl">0.01</span>, max_iter<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb71-6"><a href="#cb71-6"></a>clf.fit(X_features, y)</span>
+<span id="cb71-7"><a href="#cb71-7"></a>clf.score(X_features, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
+<pre><code>0.84</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./Chapter_8_Lab.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Decision Trees</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./Chapter_12_Lab.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Unsupervised Learning</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

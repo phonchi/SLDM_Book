@@ -1,0 +1,3014 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="phonchi">
+<meta name="dcterms.date" content="2022-10-17">
+
+<title>Statistical Learning and Data Mining - 6&nbsp; Linear Models and Regularization Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./Chapter_7_Lab.html" rel="next">
+<link href="./Chapter_5_Lab.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Chapter_6_Lab.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear Models and Regularization Methods</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistical Learning and Data Mining</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter1_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter 2_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Statistical Learning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_3_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_4_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Classification</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_5_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_6_Lab.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear Models and Regularization Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_7_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Non-linear Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_8_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Decision Trees</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_9_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Support Vector Machines</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Chapter_12_Lab.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Unsupervised Learning</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./NumPy_tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Numpy - multidimensional data arrays for python</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Colab_tutorial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Introduction to Colab</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kaggle-explore.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Introduction to Kaggle</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#subset-selection-methods" id="toc-subset-selection-methods" class="nav-link active" data-scroll-target="#subset-selection-methods"><span class="header-section-number">6.1</span> Subset Selection Methods</a>
+  <ul class="collapse">
+  <li><a href="#best-subset-selection" id="toc-best-subset-selection" class="nav-link" data-scroll-target="#best-subset-selection"><span class="header-section-number">6.1.1</span> Best Subset Selection</a></li>
+  <li><a href="#forward-and-backward-stepwise-selection" id="toc-forward-and-backward-stepwise-selection" class="nav-link" data-scroll-target="#forward-and-backward-stepwise-selection"><span class="header-section-number">6.1.2</span> Forward and Backward Stepwise Selection</a></li>
+  <li><a href="#choosing-among-models-using-the-validation-set-approach-and-cross-validation" id="toc-choosing-among-models-using-the-validation-set-approach-and-cross-validation" class="nav-link" data-scroll-target="#choosing-among-models-using-the-validation-set-approach-and-cross-validation"><span class="header-section-number">6.1.3</span> Choosing Among Models Using the Validation-Set Approach and Cross-Validation</a></li>
+  <li><a href="#model-selection-using-cross-validation" id="toc-model-selection-using-cross-validation" class="nav-link" data-scroll-target="#model-selection-using-cross-validation"><span class="header-section-number">6.1.4</span> Model selection using Cross-Validation</a></li>
+  </ul></li>
+  <li><a href="#ridge-regression-and-the-lasso" id="toc-ridge-regression-and-the-lasso" class="nav-link" data-scroll-target="#ridge-regression-and-the-lasso"><span class="header-section-number">6.2</span> Ridge Regression and the Lasso</a>
+  <ul class="collapse">
+  <li><a href="#the-lasso" id="toc-the-lasso" class="nav-link" data-scroll-target="#the-lasso"><span class="header-section-number">6.2.1</span> The Lasso</a></li>
+  </ul></li>
+  <li><a href="#pcr-and-pls-regression" id="toc-pcr-and-pls-regression" class="nav-link" data-scroll-target="#pcr-and-pls-regression"><span class="header-section-number">6.3</span> PCR and PLS Regression</a>
+  <ul class="collapse">
+  <li><a href="#principal-components-regression" id="toc-principal-components-regression" class="nav-link" data-scroll-target="#principal-components-regression"><span class="header-section-number">6.3.1</span> Principal Components Regression</a></li>
+  <li><a href="#partial-least-squares" id="toc-partial-least-squares" class="nav-link" data-scroll-target="#partial-least-squares"><span class="header-section-number">6.3.2</span> Partial Least Squares</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Linear Models and Regularization Methods</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>phonchi </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 17, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+
+<table align="left">
+<tbody><tr><td>
+<a href="https://colab.research.google.com/github/phonchi/nsysu-math524/blob/master/static_files/presentations/Chapter_6_Lab.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+</td>
+<td>
+<a target="_blank" href="https://kaggle.com/kernels/welcome?src=https://github.com/phonchi/nsysu-math524/blob/master/static_files/presentations/Chapter_6_Lab.ipynb"><img src="https://kaggle.com/static/images/open-in-kaggle.svg"></a>
+</td>
+
+</tr></tbody></table>
+<p><br></p>
+<section id="subset-selection-methods" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="subset-selection-methods"><span class="header-section-number">6.1</span> Subset Selection Methods</h2>
+<p>Some of the commands in this lab may take a while to run on your computer.</p>
+<section id="best-subset-selection" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="best-subset-selection"><span class="header-section-number">6.1.1</span> Best Subset Selection</h3>
+<p>Here we apply the best subset selection approach to the <code>Hitters</code> data. We wish to predict a baseball player’s <code>Salary</code> on the basis of various statistics associated with performance in the previous year.</p>
+<div class="cell" data-execution_count="80">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="op">!</span>pip install mlxtend <span class="op">--</span>upgrade <span class="op">--</span>no<span class="op">-</span>deps <span class="op">-</span>qq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="81">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="im">import</span> os</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="im">import</span> itertools</span>
+<span id="cb2-7"><a href="#cb2-7"></a></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="im">from</span> mlxtend.feature_selection <span class="im">import</span> ExhaustiveFeatureSelector <span class="im">as</span> EFS</span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="im">from</span> mlxtend.feature_selection <span class="im">import</span> SequentialFeatureSelector <span class="im">as</span> SFS</span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="co">#import glmnet as gln</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="co">#from sklearn.feature_selection import SequentialFeatureSelector </span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split,KFold, cross_val_score</span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> scale, StandardScaler </span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression, Ridge, RidgeCV, Lasso, LassoCV</span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb2-18"><a href="#cb2-18"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="im">from</span> sklearn.cross_decomposition <span class="im">import</span> PLSRegression, PLSSVD</span>
+<span id="cb2-20"><a href="#cb2-20"></a></span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb2-22"><a href="#cb2-22"></a>plt.style.use(<span class="st">'seaborn-white'</span>)</span>
+<span id="cb2-23"><a href="#cb2-23"></a>sns.set_context(<span class="st">"notebook"</span>, font_scale<span class="op">=</span><span class="fl">1.5</span>, rc<span class="op">=</span>{<span class="st">"lines.linewidth"</span>: <span class="fl">2.5</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>First of all, we note that the <code>Salary</code> variable is missing for some of the players. The <code>isnull()</code> function can be used to identify the missing observations. It returns a vector of the same length as the input vector, with a <code>True</code> value for any elements that are missing, and a <code>False</code> value for non-missing elements. The <code>sum()</code> function can then be used to count all of the missing elements.</p>
+<div class="cell" data-outputid="2ff89f9c-827c-483c-acc1-f1a557000b6a" data-execution_count="82">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
+<span id="cb3-2"><a href="#cb3-2"></a>drive.mount(<span class="st">'/content/drive'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount("/content/drive", force_remount=True).</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="b255e8e2-eacc-4cf2-8c8b-dd9d207f86a0" data-execution_count="83">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a>Hitter <span class="op">=</span> pd.read_csv(<span class="st">"/content/drive/MyDrive/Lab/Data/Hitters.csv"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2"></a>Hitter.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="83">
+
+  <div id="df-6cbfa9c6-b427-428b-8efa-8eb4381359f2">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AtBat</th>
+<th data-quarto-table-cell-role="th">Hits</th>
+<th data-quarto-table-cell-role="th">HmRun</th>
+<th data-quarto-table-cell-role="th">Runs</th>
+<th data-quarto-table-cell-role="th">RBI</th>
+<th data-quarto-table-cell-role="th">Walks</th>
+<th data-quarto-table-cell-role="th">Years</th>
+<th data-quarto-table-cell-role="th">CAtBat</th>
+<th data-quarto-table-cell-role="th">CHits</th>
+<th data-quarto-table-cell-role="th">CHmRun</th>
+<th data-quarto-table-cell-role="th">CRuns</th>
+<th data-quarto-table-cell-role="th">CRBI</th>
+<th data-quarto-table-cell-role="th">CWalks</th>
+<th data-quarto-table-cell-role="th">League</th>
+<th data-quarto-table-cell-role="th">Division</th>
+<th data-quarto-table-cell-role="th">PutOuts</th>
+<th data-quarto-table-cell-role="th">Assists</th>
+<th data-quarto-table-cell-role="th">Errors</th>
+<th data-quarto-table-cell-role="th">Salary</th>
+<th data-quarto-table-cell-role="th">NewLeague</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>293</td>
+<td>66</td>
+<td>1</td>
+<td>30</td>
+<td>29</td>
+<td>14</td>
+<td>1</td>
+<td>293</td>
+<td>66</td>
+<td>1</td>
+<td>30</td>
+<td>29</td>
+<td>14</td>
+<td>A</td>
+<td>E</td>
+<td>446</td>
+<td>33</td>
+<td>20</td>
+<td>NaN</td>
+<td>A</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>315</td>
+<td>81</td>
+<td>7</td>
+<td>24</td>
+<td>38</td>
+<td>39</td>
+<td>14</td>
+<td>3449</td>
+<td>835</td>
+<td>69</td>
+<td>321</td>
+<td>414</td>
+<td>375</td>
+<td>N</td>
+<td>W</td>
+<td>632</td>
+<td>43</td>
+<td>10</td>
+<td>475.0</td>
+<td>N</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>479</td>
+<td>130</td>
+<td>18</td>
+<td>66</td>
+<td>72</td>
+<td>76</td>
+<td>3</td>
+<td>1624</td>
+<td>457</td>
+<td>63</td>
+<td>224</td>
+<td>266</td>
+<td>263</td>
+<td>A</td>
+<td>W</td>
+<td>880</td>
+<td>82</td>
+<td>14</td>
+<td>480.0</td>
+<td>A</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>496</td>
+<td>141</td>
+<td>20</td>
+<td>65</td>
+<td>78</td>
+<td>37</td>
+<td>11</td>
+<td>5628</td>
+<td>1575</td>
+<td>225</td>
+<td>828</td>
+<td>838</td>
+<td>354</td>
+<td>N</td>
+<td>E</td>
+<td>200</td>
+<td>11</td>
+<td>3</td>
+<td>500.0</td>
+<td>N</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>321</td>
+<td>87</td>
+<td>10</td>
+<td>39</td>
+<td>42</td>
+<td>30</td>
+<td>2</td>
+<td>396</td>
+<td>101</td>
+<td>12</td>
+<td>48</td>
+<td>46</td>
+<td>33</td>
+<td>N</td>
+<td>E</td>
+<td>805</td>
+<td>40</td>
+<td>4</td>
+<td>91.5</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-6cbfa9c6-b427-428b-8efa-8eb4381359f2')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-6cbfa9c6-b427-428b-8efa-8eb4381359f2 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-6cbfa9c6-b427-428b-8efa-8eb4381359f2');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<div class="cell" data-outputid="9c4f9701-3313-45fe-cdf9-de703d568030" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="bu">print</span>(Hitter[<span class="st">"Salary"</span>].isnull().<span class="bu">sum</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>59</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="e5e22fe1-13e0-4be6-d8f5-79a9013d5887" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># Print the dimensions of the original Hitters data (322 rows x 20 columns)</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="bu">print</span>(Hitter.shape)</span>
+<span id="cb8-3"><a href="#cb8-3"></a></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co"># Drop any rows the contain missing values</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>Hitter <span class="op">=</span> Hitter.dropna()</span>
+<span id="cb8-6"><a href="#cb8-6"></a></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co"># Print the dimensions of the modified Hitters data (263 rows x 20 columns)</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="bu">print</span>(Hitter.shape)</span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co"># One last check: should return 0</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="bu">print</span>(Hitter[<span class="st">"Salary"</span>].isnull().<span class="bu">sum</span>())</span>
+<span id="cb8-12"><a href="#cb8-12"></a></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co"># Create dummy variables for qualitative features, since sklearn will not create dummy variables for categorical variables</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a>qual <span class="op">=</span> [<span class="st">'League'</span>, <span class="st">'Division'</span>, <span class="st">'NewLeague'</span>]</span>
+<span id="cb8-15"><a href="#cb8-15"></a>Hitter <span class="op">=</span> pd.get_dummies(Hitter, columns<span class="op">=</span>qual, drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-16"><a href="#cb8-16"></a></span>
+<span id="cb8-17"><a href="#cb8-17"></a>Hitter.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(322, 20)
+(263, 20)
+0</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="85">
+
+  <div id="df-a19ac088-bf58-4827-a892-d3f184cd3ae8">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AtBat</th>
+<th data-quarto-table-cell-role="th">Hits</th>
+<th data-quarto-table-cell-role="th">HmRun</th>
+<th data-quarto-table-cell-role="th">Runs</th>
+<th data-quarto-table-cell-role="th">RBI</th>
+<th data-quarto-table-cell-role="th">Walks</th>
+<th data-quarto-table-cell-role="th">Years</th>
+<th data-quarto-table-cell-role="th">CAtBat</th>
+<th data-quarto-table-cell-role="th">CHits</th>
+<th data-quarto-table-cell-role="th">CHmRun</th>
+<th data-quarto-table-cell-role="th">CRuns</th>
+<th data-quarto-table-cell-role="th">CRBI</th>
+<th data-quarto-table-cell-role="th">CWalks</th>
+<th data-quarto-table-cell-role="th">PutOuts</th>
+<th data-quarto-table-cell-role="th">Assists</th>
+<th data-quarto-table-cell-role="th">Errors</th>
+<th data-quarto-table-cell-role="th">Salary</th>
+<th data-quarto-table-cell-role="th">League_N</th>
+<th data-quarto-table-cell-role="th">Division_W</th>
+<th data-quarto-table-cell-role="th">NewLeague_N</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>315</td>
+<td>81</td>
+<td>7</td>
+<td>24</td>
+<td>38</td>
+<td>39</td>
+<td>14</td>
+<td>3449</td>
+<td>835</td>
+<td>69</td>
+<td>321</td>
+<td>414</td>
+<td>375</td>
+<td>632</td>
+<td>43</td>
+<td>10</td>
+<td>475.0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>479</td>
+<td>130</td>
+<td>18</td>
+<td>66</td>
+<td>72</td>
+<td>76</td>
+<td>3</td>
+<td>1624</td>
+<td>457</td>
+<td>63</td>
+<td>224</td>
+<td>266</td>
+<td>263</td>
+<td>880</td>
+<td>82</td>
+<td>14</td>
+<td>480.0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>496</td>
+<td>141</td>
+<td>20</td>
+<td>65</td>
+<td>78</td>
+<td>37</td>
+<td>11</td>
+<td>5628</td>
+<td>1575</td>
+<td>225</td>
+<td>828</td>
+<td>838</td>
+<td>354</td>
+<td>200</td>
+<td>11</td>
+<td>3</td>
+<td>500.0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>321</td>
+<td>87</td>
+<td>10</td>
+<td>39</td>
+<td>42</td>
+<td>30</td>
+<td>2</td>
+<td>396</td>
+<td>101</td>
+<td>12</td>
+<td>48</td>
+<td>46</td>
+<td>33</td>
+<td>805</td>
+<td>40</td>
+<td>4</td>
+<td>91.5</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>594</td>
+<td>169</td>
+<td>4</td>
+<td>74</td>
+<td>51</td>
+<td>35</td>
+<td>11</td>
+<td>4408</td>
+<td>1133</td>
+<td>19</td>
+<td>501</td>
+<td>336</td>
+<td>194</td>
+<td>282</td>
+<td>421</td>
+<td>25</td>
+<td>750.0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-a19ac088-bf58-4827-a892-d3f184cd3ae8')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-a19ac088-bf58-4827-a892-d3f184cd3ae8 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-a19ac088-bf58-4827-a892-d3f184cd3ae8');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>The <code>itertools.combinations</code> function can help us to generate all possible combinations contains exactly <code>k</code> element within from a list of elements. We can then perform best subset selection by identifying the best model that contains a given number of predictors, where <em>best</em> is quantified using RSS. The following code implement the first stage of best subset selection.</p>
+<div class="cell" data-outputid="f68f36d1-8672-49a9-aef1-47681689b98d" data-execution_count="86">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a><span class="bu">list</span>(itertools.combinations([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>], <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="86">
+<pre><code>[(1, 2, 3), (1, 2, 4), (1, 3, 4), (2, 3, 4)]</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">def</span> get_models(k_features, X, y):</span>
+<span id="cb12-2"><a href="#cb12-2"></a>    <span class="co">"""</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="co">    Fit all possible models that contain exactly k_features predictors.</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co">    X is predictor and y is target or response.</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="co">    """</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>    </span>
+<span id="cb12-7"><a href="#cb12-7"></a>    n_features <span class="op">=</span> X.shape[<span class="dv">1</span>]</span>
+<span id="cb12-8"><a href="#cb12-8"></a>    </span>
+<span id="cb12-9"><a href="#cb12-9"></a>    X_combos <span class="op">=</span> itertools.combinations(<span class="bu">list</span>(X.columns), k_features)</span>
+<span id="cb12-10"><a href="#cb12-10"></a>    </span>
+<span id="cb12-11"><a href="#cb12-11"></a>    best_score <span class="op">=</span> np.inf</span>
+<span id="cb12-12"><a href="#cb12-12"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13"></a>    <span class="cf">for</span> X_label <span class="kw">in</span> X_combos:</span>
+<span id="cb12-14"><a href="#cb12-14"></a>        X_smf <span class="op">=</span> <span class="st">' + '</span>.join(X_label)</span>
+<span id="cb12-15"><a href="#cb12-15"></a>        f     <span class="op">=</span> <span class="st">'Salary ~ </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(X_smf)</span>
+<span id="cb12-16"><a href="#cb12-16"></a>        <span class="co"># Fit model</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a>        lin_reg <span class="op">=</span> smf.ols(formula<span class="op">=</span>f, data<span class="op">=</span>pd.concat([X, y], axis<span class="op">=</span><span class="dv">1</span>)).fit()</span>
+<span id="cb12-18"><a href="#cb12-18"></a>        score <span class="op">=</span> lin_reg.ssr</span>
+<span id="cb12-19"><a href="#cb12-19"></a>        <span class="cf">if</span> score <span class="op">&lt;</span> best_score:</span>
+<span id="cb12-20"><a href="#cb12-20"></a>            best_score, best_subset <span class="op">=</span> score, X_label</span>
+<span id="cb12-21"><a href="#cb12-21"></a>            best_reg <span class="op">=</span> lin_reg</span>
+<span id="cb12-22"><a href="#cb12-22"></a>    </span>
+<span id="cb12-23"><a href="#cb12-23"></a></span>
+<span id="cb12-24"><a href="#cb12-24"></a>    <span class="cf">return</span> best_score, best_reg, best_subset</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Which model with 2 predictors yields lowest RSS score?</p>
+<div class="cell" data-outputid="72b894f2-c829-4cec-f634-2f5891664d5b" data-tags="[]" data-execution_count="88">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1"></a>X <span class="op">=</span> Hitter.drop(<span class="st">'Salary'</span>, axis<span class="op">=</span><span class="dv">1</span>) <span class="co">#19 variables remain</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>y <span class="op">=</span> Hitter[<span class="st">'Salary'</span>] <span class="co"># put Salary as response variable</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co"># Set number for predictors in subset</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>k <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co"># Get best models in subset</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>subset <span class="op">=</span> get_models(<span class="dv">2</span>, X, y)</span>
+<span id="cb13-9"><a href="#cb13-9"></a></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co"># Display results</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="bu">print</span>(<span class="st">'This model yields the lowest RSS score for the subset of models with </span><span class="sc">{}</span><span class="st"> predictors:'</span>.<span class="bu">format</span>(k))</span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="bu">print</span>(subset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>This model yields the lowest RSS score for the subset of models with 2 predictors:
+(30646559.890372835, &lt;statsmodels.regression.linear_model.RegressionResultsWrapper object at 0x7f81074d46d0&gt;, ('Hits', 'CRBI'))</code></pre>
+</div>
+</div>
+<p>First we fit all possible models in each subset of models with <span class="math inline">\(k\)</span> predictors. This turns out to be a very computationally expensive process as number of possible combinations without repetition is given by:</p>
+<p><span class="math inline">\(\frac{p!}{k!(p-k)!}\)</span></p>
+<p>Where <span class="math inline">\(p\)</span> is number of predictors to choose from and we choose <span class="math inline">\(k\)</span> of them.</p>
+<div class="cell" data-outputid="6b25744f-a95d-4b27-e3fb-e5ab22128fab">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># get all model results</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>rss <span class="op">=</span> []</span>
+<span id="cb15-3"><a href="#cb15-3"></a>sub <span class="op">=</span> []</span>
+<span id="cb15-4"><a href="#cb15-4"></a>reg <span class="op">=</span> []</span>
+<span id="cb15-5"><a href="#cb15-5"></a>kft <span class="op">=</span> []</span>
+<span id="cb15-6"><a href="#cb15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">5</span>):</span>
+<span id="cb15-8"><a href="#cb15-8"></a>    best_score, best_reg, best_subset <span class="op">=</span> get_models(i, X, y)</span>
+<span id="cb15-9"><a href="#cb15-9"></a>    </span>
+<span id="cb15-10"><a href="#cb15-10"></a>    rss.append(best_score)</span>
+<span id="cb15-11"><a href="#cb15-11"></a>    sub.append(best_subset)</span>
+<span id="cb15-12"><a href="#cb15-12"></a>    reg.append(best_reg)</span>
+<span id="cb15-13"><a href="#cb15-13"></a>    kft.append(i)</span>
+<span id="cb15-14"><a href="#cb15-14"></a>    <span class="bu">print</span>(<span class="st">'Progess: i = </span><span class="sc">{}</span><span class="st">, done'</span>.<span class="bu">format</span>(i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 1, done
+Progess: i = 2, done
+Progess: i = 3, done
+Progess: i = 4, done</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1"></a>results <span class="op">=</span> pd.DataFrame({<span class="st">'kft'</span>: kft, <span class="st">'rss'</span>: rss, <span class="st">'reg'</span>: reg, <span class="st">'sub'</span>: sub},</span>
+<span id="cb17-2"><a href="#cb17-2"></a>                           columns <span class="op">=</span> [<span class="st">'rss'</span>, <span class="st">'reg'</span>, <span class="st">'sub'</span>, <span class="st">'kft'</span>]).set_index(<span class="st">'kft'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="27dbebe4-81ac-4325-8594-ee0a1ab8956e">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a>results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+
+  <div id="df-2bd50750-3f56-4098-9241-b26b45a1a226">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">rss</th>
+<th data-quarto-table-cell-role="th">reg</th>
+<th data-quarto-table-cell-role="th">sub</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">kft</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>3.617968e+07</td>
+<td>&lt;statsmodels.regression.linear_model.Regressio...</td>
+<td>(CRBI,)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3.064656e+07</td>
+<td>&lt;statsmodels.regression.linear_model.Regressio...</td>
+<td>(Hits, CRBI)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2.924930e+07</td>
+<td>&lt;statsmodels.regression.linear_model.Regressio...</td>
+<td>(Hits, CRBI, PutOuts)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2.797085e+07</td>
+<td>&lt;statsmodels.regression.linear_model.Regressio...</td>
+<td>(Hits, CRBI, PutOuts, Division_W)</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-2bd50750-3f56-4098-9241-b26b45a1a226')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-2bd50750-3f56-4098-9241-b26b45a1a226 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-2bd50750-3f56-4098-9241-b26b45a1a226');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<p>We can then choose the best model using different criteria.</p>
+<div class="cell" data-outputid="5d32f61f-d3ba-4fe7-f472-608a60574d25">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">9</span>))</span>
+<span id="cb19-2"><a href="#cb19-2"></a>plt.rcParams.update({<span class="st">'font.size'</span>: <span class="dv">14</span>, <span class="st">'lines.markersize'</span>: <span class="dv">10</span>})</span>
+<span id="cb19-3"><a href="#cb19-3"></a></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="co"># Set up a 2x2 grid so we can look at 4 plots at once</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a>plt.subplot(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb19-6"><a href="#cb19-6"></a></span>
+<span id="cb19-7"><a href="#cb19-7"></a><span class="co"># We will now plot a red dot to indicate the model with the largest adjusted R^2 statistic.</span></span>
+<span id="cb19-8"><a href="#cb19-8"></a><span class="co"># The argmax() function can be used to identify the location of the maximum point of a vector</span></span>
+<span id="cb19-9"><a href="#cb19-9"></a>ax <span class="op">=</span> sns.lineplot(x <span class="op">=</span> <span class="st">"kft"</span>, y <span class="op">=</span> <span class="st">"rss"</span>, data <span class="op">=</span> results)</span>
+<span id="cb19-10"><a href="#cb19-10"></a>ax.set_xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb19-11"><a href="#cb19-11"></a>ax.set_ylabel(<span class="st">'RSS'</span>)</span>
+<span id="cb19-12"><a href="#cb19-12"></a></span>
+<span id="cb19-13"><a href="#cb19-13"></a><span class="co"># We will now plot a red dot to indicate the model with the largest adjusted R^2 statistic.</span></span>
+<span id="cb19-14"><a href="#cb19-14"></a><span class="co"># The argmax() function can be used to identify the location of the maximum point of a vector</span></span>
+<span id="cb19-15"><a href="#cb19-15"></a></span>
+<span id="cb19-16"><a href="#cb19-16"></a>results[<span class="st">"rsquared_adj"</span>] <span class="op">=</span> results.<span class="bu">apply</span>(<span class="kw">lambda</span> row: row[<span class="dv">1</span>].rsquared_adj, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-17"><a href="#cb19-17"></a></span>
+<span id="cb19-18"><a href="#cb19-18"></a>plt.subplot(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb19-19"><a href="#cb19-19"></a>ax <span class="op">=</span> sns.lineplot(x <span class="op">=</span> <span class="st">"kft"</span>, y <span class="op">=</span> <span class="st">"rsquared_adj"</span>, data <span class="op">=</span> results)</span>
+<span id="cb19-20"><a href="#cb19-20"></a>plt.plot(results[<span class="st">"rsquared_adj"</span>].argmax()<span class="op">+</span><span class="dv">1</span>, results[<span class="st">"rsquared_adj"</span>].<span class="bu">max</span>(), <span class="st">"or"</span>)</span>
+<span id="cb19-21"><a href="#cb19-21"></a>ax.set_xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb19-22"><a href="#cb19-22"></a>ax.set_ylabel(<span class="st">'adjusted rsquared'</span>)</span>
+<span id="cb19-23"><a href="#cb19-23"></a></span>
+<span id="cb19-24"><a href="#cb19-24"></a><span class="co"># We'll do the same for AIC and BIC, this time looking for the models with the SMALLEST statistic</span></span>
+<span id="cb19-25"><a href="#cb19-25"></a>results[<span class="st">"aic"</span>] <span class="op">=</span> results.<span class="bu">apply</span>(<span class="kw">lambda</span> row: row[<span class="dv">1</span>].aic, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-26"><a href="#cb19-26"></a></span>
+<span id="cb19-27"><a href="#cb19-27"></a>plt.subplot(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
+<span id="cb19-28"><a href="#cb19-28"></a>ax <span class="op">=</span> sns.lineplot(x <span class="op">=</span> <span class="st">"kft"</span>, y <span class="op">=</span> <span class="st">"aic"</span>, data <span class="op">=</span> results)</span>
+<span id="cb19-29"><a href="#cb19-29"></a>plt.plot(results[<span class="st">"aic"</span>].argmin()<span class="op">+</span><span class="dv">1</span>, results[<span class="st">"aic"</span>].<span class="bu">min</span>(), <span class="st">"or"</span>)</span>
+<span id="cb19-30"><a href="#cb19-30"></a>ax.set_xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb19-31"><a href="#cb19-31"></a>ax.set_ylabel(<span class="st">'AIC'</span>)</span>
+<span id="cb19-32"><a href="#cb19-32"></a></span>
+<span id="cb19-33"><a href="#cb19-33"></a>results[<span class="st">"bic"</span>] <span class="op">=</span> results.<span class="bu">apply</span>(<span class="kw">lambda</span> row: row[<span class="dv">1</span>].bic, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-34"><a href="#cb19-34"></a></span>
+<span id="cb19-35"><a href="#cb19-35"></a>plt.subplot(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">4</span>)</span>
+<span id="cb19-36"><a href="#cb19-36"></a>ax <span class="op">=</span> sns.lineplot(x <span class="op">=</span> <span class="st">"kft"</span>, y <span class="op">=</span> <span class="st">"bic"</span>, data <span class="op">=</span> results)</span>
+<span id="cb19-37"><a href="#cb19-37"></a>plt.plot(results[<span class="st">"bic"</span>].argmin()<span class="op">+</span><span class="dv">1</span>, results[<span class="st">"bic"</span>].<span class="bu">min</span>(), <span class="st">"or"</span>)</span>
+<span id="cb19-38"><a href="#cb19-38"></a>ax.set_xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb19-39"><a href="#cb19-39"></a>ax.set_ylabel(<span class="st">'BIC'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>Text(0, 0.5, 'BIC')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-14-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The package <a href="http://rasbt.github.io/mlxtend/"><code>mlxtend</code></a> can help us to perform feature selection, it internally use cross-validation to estimate test errors for all possible combinations of features instead of dividing the procedure into two stage</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Perform an Exhaustive Search. The EFS and SFS packages use 'neg_mean_squared_error'. The 'mean_squared_error' seems to have been deprecated. I think this is just the MSE with the a negative sign.</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb21-3"><a href="#cb21-3"></a>efs1 <span class="op">=</span> EFS(lr, </span>
+<span id="cb21-4"><a href="#cb21-4"></a>           min_features<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-5"><a href="#cb21-5"></a>           max_features<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb21-6"><a href="#cb21-6"></a>           scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>,</span>
+<span id="cb21-7"><a href="#cb21-7"></a>           print_progress<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-8"><a href="#cb21-8"></a>           n_jobs<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb21-9"><a href="#cb21-9"></a>           cv<span class="op">=</span><span class="dv">5</span>) <span class="co">#5-fold</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="1456223d-4cca-4ebd-8c16-5bb7c4b17da7">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1"></a>efs1.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 5035/5035</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>ExhaustiveFeatureSelector(estimator=LinearRegression(),
+                          feature_groups=[[0], [1], [2], [3], [4], [5], [6],
+                                          [7], [8], [9], [10], [11], [12], [13],
+                                          [14], [15], [16], [17], [18]],
+                          max_features=4, n_jobs=-1,
+                          scoring='neg_mean_squared_error')</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="61739f92-934a-4734-dc1a-d39aa08379a5">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a>efs1.best_feature_names_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>('AtBat', 'Hits', 'Walks', 'CRBI')</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="39aecda0-8579-4c70-d117-95d1f35b558d">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a><span class="co">## This is a time consuming process, be careful. You may consider setting --ServerApp.iopub_msg_rate_limit to a larger value or not to execute this cell</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a>r22 <span class="op">=</span> []</span>
+<span id="cb27-3"><a href="#cb27-3"></a>sub <span class="op">=</span> []</span>
+<span id="cb27-4"><a href="#cb27-4"></a>kft <span class="op">=</span> []</span>
+<span id="cb27-5"><a href="#cb27-5"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>):</span>
+<span id="cb27-6"><a href="#cb27-6"></a>    efs1 <span class="op">=</span> EFS(lr, </span>
+<span id="cb27-7"><a href="#cb27-7"></a>           min_features<span class="op">=</span>i,</span>
+<span id="cb27-8"><a href="#cb27-8"></a>           max_features<span class="op">=</span>i,</span>
+<span id="cb27-9"><a href="#cb27-9"></a>           <span class="co">#scoring='neg_mean_squared_error', to calculate AIC, BIC you will need rss and the estimation of sigma (also from rss) https://xavierbourretsicotte.github.io/subset_selection.html</span></span>
+<span id="cb27-10"><a href="#cb27-10"></a>           scoring<span class="op">=</span><span class="st">'r2'</span>,</span>
+<span id="cb27-11"><a href="#cb27-11"></a>           print_progress<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb27-12"><a href="#cb27-12"></a>           cv <span class="op">=</span> <span class="dv">0</span>, <span class="co">#no CV </span></span>
+<span id="cb27-13"><a href="#cb27-13"></a>           n_jobs<span class="op">=-</span><span class="dv">1</span>) <span class="co">#parallelism</span></span>
+<span id="cb27-14"><a href="#cb27-14"></a>    efs1.fit(X, y)</span>
+<span id="cb27-15"><a href="#cb27-15"></a>    best_score, best_subset <span class="op">=</span> efs1.best_score_, efs1.best_feature_names_</span>
+<span id="cb27-16"><a href="#cb27-16"></a>    </span>
+<span id="cb27-17"><a href="#cb27-17"></a>    r22.append(best_score)</span>
+<span id="cb27-18"><a href="#cb27-18"></a>    sub.append(best_subset)</span>
+<span id="cb27-19"><a href="#cb27-19"></a>    kft.append(i)</span>
+<span id="cb27-20"><a href="#cb27-20"></a>    <span class="bu">print</span>(<span class="st">'Progess: i = </span><span class="sc">{}</span><span class="st">, done'</span>.<span class="bu">format</span>(i))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 19/19</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 1, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 171/171</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 2, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 969/969</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 3, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 3876/3876</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 4, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 11628/11628</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 5, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 27132/27132</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 6, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 50388/50388</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 7, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 75582/75582</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 8, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 92378/92378</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 9, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 92378/92378</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 10, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 75582/75582</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 11, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 50388/50388</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 12, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 27132/27132</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 13, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 11628/11628</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 14, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 3876/3876</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 15, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 969/969</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 16, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 18/19</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 17, done</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Features: 1/1</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Progess: i = 18, done
+Progess: i = 19, done</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="6c153837-c392-4b50-f5e7-1df4e2a81a4d">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1"></a>results2 <span class="op">=</span> pd.DataFrame({<span class="st">'kft'</span>: kft, <span class="st">'r2'</span>: r22, <span class="st">'sub'</span>: sub},</span>
+<span id="cb64-2"><a href="#cb64-2"></a>                           columns <span class="op">=</span> [<span class="st">'r2'</span>, <span class="st">'sub'</span>, <span class="st">'kft'</span>]).set_index(<span class="st">'kft'</span>)</span>
+<span id="cb64-3"><a href="#cb64-3"></a>results2[<span class="st">'sub'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>kft
+1                                               (CRBI,)
+2                                          (Hits, CRBI)
+3                                 (Hits, CRBI, PutOuts)
+4                     (Hits, CRBI, PutOuts, Division_W)
+5              (AtBat, Hits, CRBI, PutOuts, Division_W)
+6       (AtBat, Hits, Walks, CRBI, PutOuts, Division_W)
+7     (Hits, Walks, CAtBat, CHits, CHmRun, PutOuts, ...
+8     (AtBat, Hits, Walks, CHmRun, CRuns, CWalks, Pu...
+9     (AtBat, Hits, Walks, CAtBat, CRuns, CRBI, CWal...
+10    (AtBat, Hits, Walks, CAtBat, CRuns, CRBI, CWal...
+11    (AtBat, Hits, Walks, CAtBat, CRuns, CRBI, CWal...
+12    (AtBat, Hits, Runs, Walks, CAtBat, CRuns, CRBI...
+13    (AtBat, Hits, Runs, Walks, CAtBat, CRuns, CRBI...
+14    (AtBat, Hits, HmRun, Runs, Walks, CAtBat, CRun...
+15    (AtBat, Hits, HmRun, Runs, Walks, CAtBat, CHit...
+16    (AtBat, Hits, HmRun, Runs, RBI, Walks, CAtBat,...
+17    (AtBat, Hits, HmRun, Runs, RBI, Walks, CAtBat,...
+18    (AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...
+19    (AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...
+Name: sub, dtype: object</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1"></a><span class="kw">def</span> adjust_r2(r2, num_examples, num_features):</span>
+<span id="cb66-2"><a href="#cb66-2"></a>    coef <span class="op">=</span> (num_examples <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (num_examples <span class="op">-</span> num_features <span class="op">-</span> <span class="dv">1</span>) </span>
+<span id="cb66-3"><a href="#cb66-3"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> r2) <span class="op">*</span> coef</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1"></a>adj_r2 <span class="op">=</span> []</span>
+<span id="cb67-2"><a href="#cb67-2"></a><span class="cf">for</span> i, r2 <span class="kw">in</span> <span class="bu">enumerate</span>(r22):</span>
+<span id="cb67-3"><a href="#cb67-3"></a>    adj_r2.append(adjust_r2(r2<span class="op">=</span>r2,</span>
+<span id="cb67-4"><a href="#cb67-4"></a>                  num_examples<span class="op">=</span>X.shape[<span class="dv">0</span>],</span>
+<span id="cb67-5"><a href="#cb67-5"></a>                  num_features<span class="op">=</span>i<span class="op">+</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="9c2fe492-40e4-4aac-fed0-0b6b92fd4d9a">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1"></a>adj_r2 <span class="op">=</span> np.array(adj_r2)</span>
+<span id="cb68-2"><a href="#cb68-2"></a>sns.lineplot(x<span class="op">=</span><span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>), y<span class="op">=</span>adj_r2)</span>
+<span id="cb68-3"><a href="#cb68-3"></a>plt.plot(adj_r2.argmax()<span class="op">+</span><span class="dv">1</span>, adj_r2.<span class="bu">max</span>(), <span class="st">"or"</span>)</span>
+<span id="cb68-4"><a href="#cb68-4"></a>plt.xticks(<span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>))</span>
+<span id="cb68-5"><a href="#cb68-5"></a>plt.xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb68-6"><a href="#cb68-6"></a>plt.ylabel(<span class="st">'adjusted rsquared'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>Text(0, 0.5, 'adjusted rsquared')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-22-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>According to the adjusted <span class="math inline">\(R^2\)</span>, we see that the eleven-variable model is the best model. The predictor associated with the model is listed below.</p>
+<div class="cell" data-outputid="c8c8e0c7-d2f3-4b68-b946-34719c41887c">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1"></a>results2[<span class="st">'sub'</span>][<span class="dv">11</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>('AtBat',
+ 'Hits',
+ 'Walks',
+ 'CAtBat',
+ 'CRuns',
+ 'CRBI',
+ 'CWalks',
+ 'PutOuts',
+ 'Assists',
+ 'League_N',
+ 'Division_W')</code></pre>
+</div>
+</div>
+</section>
+<section id="forward-and-backward-stepwise-selection" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="forward-and-backward-stepwise-selection"><span class="header-section-number">6.1.2</span> Forward and Backward Stepwise Selection</h3>
+<p>In practice, the best subset is quite time-consuming, therefore forward or backward selection is usually prefered. Note that we do not consider null model below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1"></a><span class="kw">def</span> processSubset(X_label):</span>
+<span id="cb72-2"><a href="#cb72-2"></a>    <span class="co"># Fit model on feature_set and calculate RSS</span></span>
+<span id="cb72-3"><a href="#cb72-3"></a>    X_smf <span class="op">=</span> <span class="st">' + '</span>.join(X_label)</span>
+<span id="cb72-4"><a href="#cb72-4"></a>    f     <span class="op">=</span> <span class="st">'Salary ~ </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(X_smf)</span>
+<span id="cb72-5"><a href="#cb72-5"></a>    <span class="co"># Fit model</span></span>
+<span id="cb72-6"><a href="#cb72-6"></a>    lin_reg <span class="op">=</span> smf.ols(formula<span class="op">=</span>f, data<span class="op">=</span>pd.concat([X, y], axis<span class="op">=</span><span class="dv">1</span>)).fit()</span>
+<span id="cb72-7"><a href="#cb72-7"></a>    RSS <span class="op">=</span> lin_reg.ssr</span>
+<span id="cb72-8"><a href="#cb72-8"></a>    <span class="cf">return</span> {<span class="st">'model'</span>: lin_reg, <span class="st">'RSS'</span>: RSS}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1"></a><span class="kw">def</span> forward(predictors):</span>
+<span id="cb73-2"><a href="#cb73-2"></a></span>
+<span id="cb73-3"><a href="#cb73-3"></a>    <span class="co"># Pull out predictors we still need to process</span></span>
+<span id="cb73-4"><a href="#cb73-4"></a>    remaining_predictors <span class="op">=</span> [p <span class="cf">for</span> p <span class="kw">in</span> X.columns <span class="cf">if</span> p <span class="kw">not</span> <span class="kw">in</span> predictors]</span>
+<span id="cb73-5"><a href="#cb73-5"></a>      </span>
+<span id="cb73-6"><a href="#cb73-6"></a>    results <span class="op">=</span> []</span>
+<span id="cb73-7"><a href="#cb73-7"></a>    </span>
+<span id="cb73-8"><a href="#cb73-8"></a>    <span class="cf">for</span> p <span class="kw">in</span> remaining_predictors:</span>
+<span id="cb73-9"><a href="#cb73-9"></a>        results.append(processSubset(predictors<span class="op">+</span>[p]))</span>
+<span id="cb73-10"><a href="#cb73-10"></a>    </span>
+<span id="cb73-11"><a href="#cb73-11"></a>    <span class="co"># Wrap everything up in a nice dataframe</span></span>
+<span id="cb73-12"><a href="#cb73-12"></a>    models <span class="op">=</span> pd.DataFrame(results)</span>
+<span id="cb73-13"><a href="#cb73-13"></a>    </span>
+<span id="cb73-14"><a href="#cb73-14"></a>    <span class="co"># Choose the model with the lowest RSS</span></span>
+<span id="cb73-15"><a href="#cb73-15"></a>    best_model <span class="op">=</span> models.loc[models[<span class="st">'RSS'</span>].argmin()]</span>
+<span id="cb73-16"><a href="#cb73-16"></a>    </span>
+<span id="cb73-17"><a href="#cb73-17"></a>    <span class="co"># Return the best model, along with some other useful information about the model</span></span>
+<span id="cb73-18"><a href="#cb73-18"></a>    <span class="cf">return</span> best_model</span>
+<span id="cb73-19"><a href="#cb73-19"></a></span>
+<span id="cb73-20"><a href="#cb73-20"></a><span class="kw">def</span> backward(predictors):</span>
+<span id="cb73-21"><a href="#cb73-21"></a>    </span>
+<span id="cb73-22"><a href="#cb73-22"></a>    results <span class="op">=</span> []</span>
+<span id="cb73-23"><a href="#cb73-23"></a>    </span>
+<span id="cb73-24"><a href="#cb73-24"></a>    <span class="cf">for</span> combo <span class="kw">in</span> itertools.combinations(predictors, <span class="bu">len</span>(predictors)<span class="op">-</span><span class="dv">1</span>):</span>
+<span id="cb73-25"><a href="#cb73-25"></a>        results.append(processSubset(combo))</span>
+<span id="cb73-26"><a href="#cb73-26"></a>    </span>
+<span id="cb73-27"><a href="#cb73-27"></a>    <span class="co"># Wrap everything up in a nice dataframe</span></span>
+<span id="cb73-28"><a href="#cb73-28"></a>    models <span class="op">=</span> pd.DataFrame(results)</span>
+<span id="cb73-29"><a href="#cb73-29"></a>    </span>
+<span id="cb73-30"><a href="#cb73-30"></a>    <span class="co"># Choose the model with the lowest RSS</span></span>
+<span id="cb73-31"><a href="#cb73-31"></a>    best_model <span class="op">=</span> models.loc[models[<span class="st">'RSS'</span>].argmin()]</span>
+<span id="cb73-32"><a href="#cb73-32"></a></span>
+<span id="cb73-33"><a href="#cb73-33"></a>    <span class="cf">return</span> best_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="8c81158b-e56f-4ff2-c6ab-0b544ac800e5">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1"></a>models2 <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">'RSS'</span>, <span class="st">'model'</span>])</span>
+<span id="cb74-2"><a href="#cb74-2"></a></span>
+<span id="cb74-3"><a href="#cb74-3"></a>predictors <span class="op">=</span> [] <span class="co"># we start with null model M0</span></span>
+<span id="cb74-4"><a href="#cb74-4"></a></span>
+<span id="cb74-5"><a href="#cb74-5"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="bu">len</span>(X.columns)<span class="op">+</span><span class="dv">1</span>):</span>
+<span id="cb74-6"><a href="#cb74-6"></a>    models2.loc[i] <span class="op">=</span> forward(predictors)</span>
+<span id="cb74-7"><a href="#cb74-7"></a>    exog <span class="op">=</span> models2.loc[i][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb74-8"><a href="#cb74-8"></a>    exog.remove(<span class="st">'Intercept'</span>) <span class="co">#smf will automatically adds intercept</span></span>
+<span id="cb74-9"><a href="#cb74-9"></a>    predictors <span class="op">=</span> exog</span>
+<span id="cb74-10"><a href="#cb74-10"></a>    <span class="bu">print</span>(i, predictors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 ['CRBI']
+2 ['CRBI', 'Hits']
+3 ['CRBI', 'Hits', 'PutOuts']
+4 ['CRBI', 'Hits', 'PutOuts', 'Division_W']
+5 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat']
+6 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks']
+7 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks']
+8 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns']
+9 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat']
+10 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists']
+11 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N']
+12 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs']
+13 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors']
+14 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun']
+15 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun', 'CHits']
+16 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun', 'CHits', 'RBI']
+17 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun', 'CHits', 'RBI', 'NewLeague_N']
+18 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun', 'CHits', 'RBI', 'NewLeague_N', 'Years']
+19 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns', 'CAtBat', 'Assists', 'League_N', 'Runs', 'Errors', 'HmRun', 'CHits', 'RBI', 'NewLeague_N', 'Years', 'CHmRun']</code></pre>
+</div>
+</div>
+<p>We can then use <code>AIC</code> or <code>BIC</code> to choose the best model in the second stage</p>
+<div class="cell" data-outputid="f29a11ec-b766-40e3-9fc1-c135cb390dba">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1"></a>bic_f <span class="op">=</span> []</span>
+<span id="cb76-2"><a href="#cb76-2"></a></span>
+<span id="cb76-3"><a href="#cb76-3"></a><span class="cf">for</span> m <span class="kw">in</span> models2.model:</span>
+<span id="cb76-4"><a href="#cb76-4"></a>    bic_f.append(m.bic)</span>
+<span id="cb76-5"><a href="#cb76-5"></a>    </span>
+<span id="cb76-6"><a href="#cb76-6"></a>np.array(bic_f).argmin()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>5</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="1649bf91-3983-473e-e56b-e7f29545ce5d">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1"></a>models3 <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">'RSS'</span>, <span class="st">'model'</span>], index <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(X.columns)))</span>
+<span id="cb78-2"><a href="#cb78-2"></a></span>
+<span id="cb78-3"><a href="#cb78-3"></a>predictors <span class="op">=</span> X.columns <span class="co"># we start with full model Mp</span></span>
+<span id="cb78-4"><a href="#cb78-4"></a>models3.loc[<span class="bu">len</span>(predictors)] <span class="op">=</span> processSubset(predictors)</span>
+<span id="cb78-5"><a href="#cb78-5"></a></span>
+<span id="cb78-6"><a href="#cb78-6"></a><span class="cf">while</span>(<span class="bu">len</span>(predictors) <span class="op">&gt;</span> <span class="dv">1</span>):  </span>
+<span id="cb78-7"><a href="#cb78-7"></a>    models3.loc[<span class="bu">len</span>(predictors)<span class="op">-</span><span class="dv">1</span>] <span class="op">=</span> backward(predictors)</span>
+<span id="cb78-8"><a href="#cb78-8"></a>    exog <span class="op">=</span> models3.loc[<span class="bu">len</span>(predictors)<span class="op">-</span><span class="dv">1</span>][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb78-9"><a href="#cb78-9"></a>    exog.remove(<span class="st">'Intercept'</span>)</span>
+<span id="cb78-10"><a href="#cb78-10"></a>    predictors <span class="op">=</span> exog</span>
+<span id="cb78-11"><a href="#cb78-11"></a>    <span class="bu">print</span>(<span class="bu">len</span>(predictors), predictors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>18 ['AtBat', 'Hits', 'HmRun', 'Runs', 'RBI', 'Walks', 'Years', 'CAtBat', 'CHits', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W', 'NewLeague_N']
+17 ['AtBat', 'Hits', 'HmRun', 'Runs', 'RBI', 'Walks', 'CAtBat', 'CHits', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W', 'NewLeague_N']
+16 ['AtBat', 'Hits', 'HmRun', 'Runs', 'RBI', 'Walks', 'CAtBat', 'CHits', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W']
+15 ['AtBat', 'Hits', 'HmRun', 'Runs', 'Walks', 'CAtBat', 'CHits', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W']
+14 ['AtBat', 'Hits', 'HmRun', 'Runs', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W']
+13 ['AtBat', 'Hits', 'Runs', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Errors', 'League_N', 'Division_W']
+12 ['AtBat', 'Hits', 'Runs', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'League_N', 'Division_W']
+11 ['AtBat', 'Hits', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'League_N', 'Division_W']
+10 ['AtBat', 'Hits', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Assists', 'Division_W']
+9 ['AtBat', 'Hits', 'Walks', 'CAtBat', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Division_W']
+8 ['AtBat', 'Hits', 'Walks', 'CRuns', 'CRBI', 'CWalks', 'PutOuts', 'Division_W']
+7 ['AtBat', 'Hits', 'Walks', 'CRuns', 'CWalks', 'PutOuts', 'Division_W']
+6 ['AtBat', 'Hits', 'Walks', 'CRuns', 'PutOuts', 'Division_W']
+5 ['AtBat', 'Hits', 'Walks', 'CRuns', 'PutOuts']
+4 ['AtBat', 'Hits', 'CRuns', 'PutOuts']
+3 ['Hits', 'CRuns', 'PutOuts']
+2 ['Hits', 'CRuns']
+1 ['CRuns']</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="64cfeac3-1ecb-4d94-bf9f-1621bf7bf509">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1"></a>bic_b <span class="op">=</span> []</span>
+<span id="cb80-2"><a href="#cb80-2"></a></span>
+<span id="cb80-3"><a href="#cb80-3"></a><span class="cf">for</span> m <span class="kw">in</span> models3.model:</span>
+<span id="cb80-4"><a href="#cb80-4"></a>    bic_b.append(m.bic)</span>
+<span id="cb80-5"><a href="#cb80-5"></a>    </span>
+<span id="cb80-6"><a href="#cb80-6"></a>np.array(bic_b).argmin()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>7</code></pre>
+</div>
+</div>
+<p>We see that using forward stepwise selection, the best one-variable model contains only <code>CRBI</code>, and the best two-variable model additionally includes <code>Hits</code>. For this data, the best one-variable through six-variable models are each identical for best subset and forward selection. However, the best seven-variable models identified by forward stepwise selection, backward stepwise selection, and best subset selection are different.</p>
+<div class="cell" data-outputid="b4c2ae97-a097-4b92-e6ff-2a24921529f7">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb82-1"><a href="#cb82-1"></a><span class="bu">print</span>(results2[<span class="st">'sub'</span>][<span class="dv">6</span>]) <span class="co">#best subset</span></span>
+<span id="cb82-2"><a href="#cb82-2"></a><span class="bu">print</span>(models2[<span class="st">'model'</span>][<span class="dv">6</span>].model.exog_names[<span class="dv">1</span>:]) <span class="co"># Do not print Intercept</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>('AtBat', 'Hits', 'Walks', 'CRBI', 'PutOuts', 'Division_W')
+['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks']</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="3fda9402-33bf-4bec-d7d4-52e5ea25d1d7">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1"></a><span class="bu">print</span>(results2[<span class="st">'sub'</span>][<span class="dv">7</span>])</span>
+<span id="cb84-2"><a href="#cb84-2"></a><span class="bu">print</span>(models2[<span class="st">'model'</span>][<span class="dv">7</span>].model.exog_names[<span class="dv">1</span>:]) <span class="co"># Do not print Intercept</span></span>
+<span id="cb84-3"><a href="#cb84-3"></a><span class="bu">print</span>(models3[<span class="st">'model'</span>][<span class="dv">7</span>].model.exog_names[<span class="dv">1</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>('Hits', 'Walks', 'CAtBat', 'CHits', 'CHmRun', 'PutOuts', 'Division_W')
+['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks']
+['AtBat', 'Hits', 'Walks', 'CRuns', 'CWalks', 'PutOuts', 'Division_W']</code></pre>
+</div>
+</div>
+<p>There are also other feature selection methods available in sklearn https://scikit-learn.org/stable/modules/feature_selection.html and mlxtend http://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/</p>
+<div class="cell" data-outputid="929a769e-dc98-4279-d61c-91e163ac490e">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb86-2"><a href="#cb86-2"></a>sfs1 <span class="op">=</span> SFS(lr, </span>
+<span id="cb86-3"><a href="#cb86-3"></a>          k_features<span class="op">=</span><span class="dv">19</span>, </span>
+<span id="cb86-4"><a href="#cb86-4"></a>          forward<span class="op">=</span><span class="va">True</span>, </span>
+<span id="cb86-5"><a href="#cb86-5"></a>          floating<span class="op">=</span><span class="va">False</span>, </span>
+<span id="cb86-6"><a href="#cb86-6"></a>          scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>,</span>
+<span id="cb86-7"><a href="#cb86-7"></a>          cv<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb86-8"><a href="#cb86-8"></a></span>
+<span id="cb86-9"><a href="#cb86-9"></a>sfs1.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<pre><code>SequentialFeatureSelector(estimator=LinearRegression(), k_features=(19, 19),
+                          scoring='neg_mean_squared_error')</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="27e96121-efaa-4330-a8c3-fa4767dbc6a1">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1"></a>pd.DataFrame.from_dict(sfs1.get_metric_dict()).T</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+
+  <div id="df-1437ee10-c5ff-4b1a-8fc0-aded25620ecb">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">feature_idx</th>
+<th data-quarto-table-cell-role="th">cv_scores</th>
+<th data-quarto-table-cell-role="th">avg_score</th>
+<th data-quarto-table-cell-role="th">feature_names</th>
+<th data-quarto-table-cell-role="th">ci_bound</th>
+<th data-quarto-table-cell-role="th">std_dev</th>
+<th data-quarto-table-cell-role="th">std_err</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>(11,)</td>
+<td>[-69552.92336716877, -213009.92207213468, -118...</td>
+<td>-142142.865462</td>
+<td>(CRBI,)</td>
+<td>74428.969884</td>
+<td>57908.267167</td>
+<td>28954.133583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>(1, 11)</td>
+<td>[-53798.49669675372, -163254.80704040316, -104...</td>
+<td>-124277.839415</td>
+<td>(Hits, CRBI)</td>
+<td>67031.533473</td>
+<td>52152.810324</td>
+<td>26076.405162</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>(1, 11, 17)</td>
+<td>[-62163.905140527975, -153941.83393405456, -97...</td>
+<td>-120082.156746</td>
+<td>(Hits, CRBI, Division_W)</td>
+<td>59591.942149</td>
+<td>46364.555526</td>
+<td>23182.277763</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>(1, 11, 13, 17)</td>
+<td>[-65576.39003922763, -141278.46897398788, -825...</td>
+<td>-117217.983933</td>
+<td>(Hits, CRBI, PutOuts, Division_W)</td>
+<td>56263.230127</td>
+<td>43774.704486</td>
+<td>21887.352243</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>(0, 1, 11, 13, 17)</td>
+<td>[-64199.08545469596, -133171.50527159323, -836...</td>
+<td>-114112.221253</td>
+<td>(AtBat, Hits, CRBI, PutOuts, Division_W)</td>
+<td>54818.569767</td>
+<td>42650.709646</td>
+<td>21325.354823</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>(0, 1, 5, 11, 13, 17)</td>
+<td>[-60075.53412214324, -132306.39833204867, -765...</td>
+<td>-110162.261438</td>
+<td>(AtBat, Hits, Walks, CRBI, PutOuts, Division_W)</td>
+<td>57689.191989</td>
+<td>44884.151259</td>
+<td>22442.075629</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>(0, 1, 3, 5, 11, 13, 17)</td>
+<td>[-60330.25929006559, -132346.01741313486, -766...</td>
+<td>-110553.231464</td>
+<td>(AtBat, Hits, Runs, Walks, CRBI, PutOuts, Divi...</td>
+<td>58252.099546</td>
+<td>45322.112462</td>
+<td>22661.056231</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>(0, 1, 3, 5, 6, 11, 13, 17)</td>
+<td>[-64303.54034551623, -130892.95408839498, -745...</td>
+<td>-110934.554619</td>
+<td>(AtBat, Hits, Runs, Walks, Years, CRBI, PutOut...</td>
+<td>57911.784603</td>
+<td>45057.335875</td>
+<td>22528.667937</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>(0, 1, 3, 5, 6, 10, 11, 13, 17)</td>
+<td>[-63508.043800155414, -137971.21159579078, -75...</td>
+<td>-111236.70073</td>
+<td>(AtBat, Hits, Runs, Walks, Years, CRuns, CRBI,...</td>
+<td>57344.878076</td>
+<td>44616.263337</td>
+<td>22308.131669</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">10</td>
+<td>(0, 1, 3, 5, 6, 10, 11, 12, 13, 17)</td>
+<td>[-75371.33424690235, -128223.28240695987, -742...</td>
+<td>-110021.54195</td>
+<td>(AtBat, Hits, Runs, Walks, Years, CRuns, CRBI,...</td>
+<td>52372.497258</td>
+<td>40747.582133</td>
+<td>20373.791066</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>(0, 1, 3, 5, 6, 10, 11, 12, 13, 16, 17)</td>
+<td>[-75554.06873028616, -129427.52046763463, -741...</td>
+<td>-110792.912735</td>
+<td>(AtBat, Hits, Runs, Walks, Years, CRuns, CRBI,...</td>
+<td>52633.998179</td>
+<td>40951.038733</td>
+<td>20475.519367</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>(0, 1, 3, 5, 6, 10, 11, 12, 13, 16, 17, 18)</td>
+<td>[-75588.46350075006, -130320.07532800487, -754...</td>
+<td>-111570.449036</td>
+<td>(AtBat, Hits, Runs, Walks, Years, CRuns, CRBI,...</td>
+<td>52803.480655</td>
+<td>41082.901857</td>
+<td>20541.450929</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>(0, 1, 2, 3, 5, 6, 10, 11, 12, 13, 16, 17, 18)</td>
+<td>[-75578.82866274133, -130098.48628552802, -797...</td>
+<td>-112677.57758</td>
+<td>(AtBat, Hits, HmRun, Runs, Walks, Years, CRuns...</td>
+<td>51485.083739</td>
+<td>40057.144267</td>
+<td>20028.572133</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 16, 17, 18)</td>
+<td>[-75574.5961843588, -132822.10224589257, -8117...</td>
+<td>-113601.744452</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>51592.950752</td>
+<td>40141.068467</td>
+<td>20070.534233</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 15, 16, ...</td>
+<td>[-75795.22141743562, -132827.4310618751, -8116...</td>
+<td>-115593.410667</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>53008.106168</td>
+<td>41242.107459</td>
+<td>20621.053729</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">16</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, ...</td>
+<td>[-77460.55999200376, -130968.8896155133, -8015...</td>
+<td>-116290.756812</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>51687.395454</td>
+<td>40214.549654</td>
+<td>20107.274827</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 1...</td>
+<td>[-74741.82159316978, -128751.90512264056, -799...</td>
+<td>-118642.76362</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>56165.48438</td>
+<td>43698.654974</td>
+<td>21849.327487</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">18</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14...</td>
+<td>[-75598.10118706549, -128381.8825323173, -7998...</td>
+<td>-118980.278688</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>56546.558941</td>
+<td>43995.143928</td>
+<td>21997.571964</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">19</td>
+<td>(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,...</td>
+<td>[-76408.91409133923, -129937.76968228162, -799...</td>
+<td>-121136.310318</td>
+<td>(AtBat, Hits, HmRun, Runs, RBI, Walks, Years, ...</td>
+<td>59785.432226</td>
+<td>46515.09738</td>
+<td>23257.54869</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-1437ee10-c5ff-4b1a-8fc0-aded25620ecb')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-1437ee10-c5ff-4b1a-8fc0-aded25620ecb button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-1437ee10-c5ff-4b1a-8fc0-aded25620ecb');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+</section>
+<section id="choosing-among-models-using-the-validation-set-approach-and-cross-validation" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="choosing-among-models-using-the-validation-set-approach-and-cross-validation"><span class="header-section-number">6.1.3</span> Choosing Among Models Using the Validation-Set Approach and Cross-Validation</h3>
+<p>We just saw that it is possible to choose among a set of models of different sizes using AIC, BIC, and adjusted <span class="math inline">\(R^2\)</span> in the second stage. We will now consider how to do this using the validation set and cross-validation approaches.</p>
+<p>In order for these approaches to yield accurate estimates of the test error, we must use <em>only the training observations</em> to perform all aspects of model-fitting—including variable selection. Therefore, the determination of which model of a given size is best must be made using <em>only the training observations</em>. This point is subtle but important. If the full data set is used to perform the best subset selection step, the validation set errors and cross-validation errors that we obtain will not be accurate estimates of the test error.</p>
+<p>In order to use the validation set approach, we begin by splitting the observations into a training set and a test set. We also set a random seed so that the user will obtain the same training set/test set split.</p>
+<div class="cell" data-execution_count="89">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb89-1"><a href="#cb89-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb90-1"><a href="#cb90-1"></a><span class="kw">def</span> processSubset(X_label, X_train, y_train, X_test, y_test):</span>
+<span id="cb90-2"><a href="#cb90-2"></a>    <span class="co"># Fit model on feature_set and calculate RSS</span></span>
+<span id="cb90-3"><a href="#cb90-3"></a>    X_smf <span class="op">=</span> <span class="st">' + '</span>.join(X_label)</span>
+<span id="cb90-4"><a href="#cb90-4"></a>    f     <span class="op">=</span> <span class="st">'Salary ~ </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(X_smf)</span>
+<span id="cb90-5"><a href="#cb90-5"></a>    <span class="co"># Fit model</span></span>
+<span id="cb90-6"><a href="#cb90-6"></a>    lin_reg <span class="op">=</span> smf.ols(formula<span class="op">=</span>f, data<span class="op">=</span>pd.concat([X_train, y_train], axis<span class="op">=</span><span class="dv">1</span>)).fit()</span>
+<span id="cb90-7"><a href="#cb90-7"></a>    RSS <span class="op">=</span> ((lin_reg.predict(X_test[<span class="bu">list</span>(X_label)]) <span class="op">-</span> y_test) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>() <span class="co">#on test set</span></span>
+<span id="cb90-8"><a href="#cb90-8"></a>    <span class="cf">return</span> {<span class="st">'model'</span>: lin_reg, <span class="st">'RSS'</span>: RSS}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1"></a><span class="kw">def</span> forward(predictors, X_train, y_train, X_test, y_test):</span>
+<span id="cb91-2"><a href="#cb91-2"></a></span>
+<span id="cb91-3"><a href="#cb91-3"></a>    <span class="co"># Pull out predictors we still need to process</span></span>
+<span id="cb91-4"><a href="#cb91-4"></a>    remaining_predictors <span class="op">=</span> [p <span class="cf">for</span> p <span class="kw">in</span> X_train.columns <span class="cf">if</span> p <span class="kw">not</span> <span class="kw">in</span> predictors]</span>
+<span id="cb91-5"><a href="#cb91-5"></a>    </span>
+<span id="cb91-6"><a href="#cb91-6"></a>    results <span class="op">=</span> []</span>
+<span id="cb91-7"><a href="#cb91-7"></a>    </span>
+<span id="cb91-8"><a href="#cb91-8"></a>    <span class="cf">for</span> p <span class="kw">in</span> remaining_predictors:</span>
+<span id="cb91-9"><a href="#cb91-9"></a>        results.append(processSubset(predictors<span class="op">+</span>[p], X_train, y_train, X_test, y_test))</span>
+<span id="cb91-10"><a href="#cb91-10"></a>    </span>
+<span id="cb91-11"><a href="#cb91-11"></a>    <span class="co"># Wrap everything up in a nice dataframe</span></span>
+<span id="cb91-12"><a href="#cb91-12"></a>    models <span class="op">=</span> pd.DataFrame(results)</span>
+<span id="cb91-13"><a href="#cb91-13"></a>    </span>
+<span id="cb91-14"><a href="#cb91-14"></a>    <span class="co"># Choose the model with the highest RSS</span></span>
+<span id="cb91-15"><a href="#cb91-15"></a>    best_model <span class="op">=</span> models.loc[models[<span class="st">'RSS'</span>].argmin()]</span>
+<span id="cb91-16"><a href="#cb91-16"></a>    </span>
+<span id="cb91-17"><a href="#cb91-17"></a>    <span class="co"># Return the best model, along with some other useful information about the model</span></span>
+<span id="cb91-18"><a href="#cb91-18"></a>    <span class="cf">return</span> best_model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="56a29393-8042-4c5d-bbbb-62ed5afeb439">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1"></a>models_test <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">'RSS'</span>, <span class="st">'model'</span>])</span>
+<span id="cb92-2"><a href="#cb92-2"></a></span>
+<span id="cb92-3"><a href="#cb92-3"></a>predictors <span class="op">=</span> []</span>
+<span id="cb92-4"><a href="#cb92-4"></a></span>
+<span id="cb92-5"><a href="#cb92-5"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="bu">len</span>(X.columns)<span class="op">+</span><span class="dv">1</span>):</span>
+<span id="cb92-6"><a href="#cb92-6"></a>    models_test.loc[i] <span class="op">=</span> forward(predictors, X_train, y_train, X_test, y_test)</span>
+<span id="cb92-7"><a href="#cb92-7"></a>    exog <span class="op">=</span> models_test.loc[i][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb92-8"><a href="#cb92-8"></a>    exog.remove(<span class="st">'Intercept'</span>)</span>
+<span id="cb92-9"><a href="#cb92-9"></a>    predictors <span class="op">=</span> exog</span>
+<span id="cb92-10"><a href="#cb92-10"></a>    <span class="bu">print</span>(i, predictors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 ['CRuns']
+2 ['CRuns', 'Hits']
+3 ['CRuns', 'Hits', 'Walks']
+4 ['CRuns', 'Hits', 'Walks', 'CWalks']
+5 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat']
+6 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun']
+7 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years']
+8 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat']
+9 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists']
+10 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun']
+11 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs']
+12 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N']
+13 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N']
+14 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors']
+15 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors', 'Division_W']
+16 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors', 'Division_W', 'CRBI']
+17 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors', 'Division_W', 'CRBI', 'RBI']
+18 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors', 'Division_W', 'CRBI', 'RBI', 'PutOuts']
+19 ['CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years', 'CAtBat', 'Assists', 'HmRun', 'Runs', 'League_N', 'NewLeague_N', 'Errors', 'Division_W', 'CRBI', 'RBI', 'PutOuts', 'CHits']</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="e3d80c31-429e-406e-fe48-ccbe7cf168dd">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb94-1"><a href="#cb94-1"></a>sns.lineplot(x<span class="op">=</span><span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>), y<span class="op">=</span>models_test[<span class="st">'RSS'</span>])</span>
+<span id="cb94-2"><a href="#cb94-2"></a>plt.xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb94-3"><a href="#cb94-3"></a>plt.ylabel(<span class="st">'RSS'</span>)</span>
+<span id="cb94-4"><a href="#cb94-4"></a>plt.plot(models_test[<span class="st">'RSS'</span>].argmin()<span class="op">+</span><span class="dv">1</span>, models_test[<span class="st">'RSS'</span>].<span class="bu">min</span>(), <span class="st">'or'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-38-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now that we know what we’re looking for, let’s perform forward selection on the full dataset and select the best 7-predictor model. It is important that we make use of the <em>full data set</em> in order to obtain more accurate coefficient estimates. <strong>Note that we perform forward selection on the full data set and select the best 7-predictor model, rather than simply using the predictors that we obtained from the training set, because the best 7-predictor model on the full data set may differ from the corresponding model on the training set.</strong></p>
+<div class="cell" data-outputid="3096641d-abe4-4256-ca1d-282bf7ba77f7">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb95-1"><a href="#cb95-1"></a>models_full <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">'RSS'</span>, <span class="st">'model'</span>])</span>
+<span id="cb95-2"><a href="#cb95-2"></a></span>
+<span id="cb95-3"><a href="#cb95-3"></a>predictors <span class="op">=</span> []</span>
+<span id="cb95-4"><a href="#cb95-4"></a>   </span>
+<span id="cb95-5"><a href="#cb95-5"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">8</span>):</span>
+<span id="cb95-6"><a href="#cb95-6"></a>    models_full.loc[i] <span class="op">=</span> forward(predictors, X, y, X, y) <span class="co">#use full dataset</span></span>
+<span id="cb95-7"><a href="#cb95-7"></a>    exog <span class="op">=</span> models_full.loc[i][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb95-8"><a href="#cb95-8"></a>    exog.remove(<span class="st">'Intercept'</span>)</span>
+<span id="cb95-9"><a href="#cb95-9"></a>    predictors <span class="op">=</span> exog</span>
+<span id="cb95-10"><a href="#cb95-10"></a>    <span class="bu">print</span>(i, predictors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 ['CRBI']
+2 ['CRBI', 'Hits']
+3 ['CRBI', 'Hits', 'PutOuts']
+4 ['CRBI', 'Hits', 'PutOuts', 'Division_W']
+5 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat']
+6 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks']
+7 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks']</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="30f4583f-e9b1-4aaf-ff4b-c1cb15237e05">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb97-1"><a href="#cb97-1"></a><span class="bu">print</span>(models_test.loc[<span class="dv">7</span>, <span class="st">'model'</span>].model.exog_names)</span>
+<span id="cb97-2"><a href="#cb97-2"></a><span class="bu">print</span>(models_full.loc[<span class="dv">7</span>, <span class="st">'model'</span>].model.exog_names) <span class="co"># we will use this one as our final model!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['Intercept', 'CRuns', 'Hits', 'Walks', 'CWalks', 'AtBat', 'CHmRun', 'Years']
+['Intercept', 'CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks']</code></pre>
+</div>
+</div>
+</section>
+<section id="model-selection-using-cross-validation" class="level3" data-number="6.1.4">
+<h3 data-number="6.1.4" class="anchored" data-anchor-id="model-selection-using-cross-validation"><span class="header-section-number">6.1.4</span> Model selection using Cross-Validation</h3>
+<p>Now let’s try to choose among the models of different sizes using cross-validation. This approach is somewhat involved, as we must perform forward selection within each of the <span class="math inline">\(k\)</span> training sets. Despite this, we see that with its clever subsetting syntax, <code>python</code> makes this job quite easy. First, we create a vector that assigns each observation to one of <span class="math inline">\(k = 10\)</span> folds, and we create a DataFrame in which we will store the results:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb99-1"><a href="#cb99-1"></a>k <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb99-2"><a href="#cb99-2"></a>kf <span class="op">=</span> KFold(n_splits<span class="op">=</span>k, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb100-1"><a href="#cb100-1"></a><span class="co"># Create a DataFrame to store the results of our upcoming calculations</span></span>
+<span id="cb100-2"><a href="#cb100-2"></a>cv_errors <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span><span class="bu">range</span>(<span class="dv">1</span>,k<span class="op">+</span><span class="dv">1</span>), index<span class="op">=</span><span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>))</span>
+<span id="cb100-3"><a href="#cb100-3"></a>cv_errors <span class="op">=</span> cv_errors.fillna(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb101-1"><a href="#cb101-1"></a>models_cv <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">"RSS"</span>, <span class="st">"model"</span>])</span>
+<span id="cb101-2"><a href="#cb101-2"></a></span>
+<span id="cb101-3"><a href="#cb101-3"></a>j <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb101-4"><a href="#cb101-4"></a><span class="co"># Outer loop iterates over all folds</span></span>
+<span id="cb101-5"><a href="#cb101-5"></a><span class="cf">for</span> train_index, test_index <span class="kw">in</span> kf.split(X):</span>
+<span id="cb101-6"><a href="#cb101-6"></a>    j <span class="op">=</span> j<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb101-7"><a href="#cb101-7"></a>    <span class="co"># Reset predictors</span></span>
+<span id="cb101-8"><a href="#cb101-8"></a>    predictors <span class="op">=</span> []</span>
+<span id="cb101-9"><a href="#cb101-9"></a>    </span>
+<span id="cb101-10"><a href="#cb101-10"></a>    X_train2, X_test2 <span class="op">=</span> X.iloc[train_index], X.iloc[test_index]</span>
+<span id="cb101-11"><a href="#cb101-11"></a>    y_train2, y_test2 <span class="op">=</span> y.iloc[train_index], y.iloc[test_index]</span>
+<span id="cb101-12"><a href="#cb101-12"></a>    </span>
+<span id="cb101-13"><a href="#cb101-13"></a>    <span class="co"># Inner loop iterates over each size i</span></span>
+<span id="cb101-14"><a href="#cb101-14"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="bu">len</span>(X.columns)<span class="op">+</span><span class="dv">1</span>):    </span>
+<span id="cb101-15"><a href="#cb101-15"></a>    </span>
+<span id="cb101-16"><a href="#cb101-16"></a>        <span class="co"># The perform forward selection on the full dataset minus the jth fold, test on jth fold</span></span>
+<span id="cb101-17"><a href="#cb101-17"></a>        models_cv.loc[i] <span class="op">=</span> forward(predictors, X_train2, y_train2, X_test2, y_test2)</span>
+<span id="cb101-18"><a href="#cb101-18"></a>        </span>
+<span id="cb101-19"><a href="#cb101-19"></a>        <span class="co"># Save the cross-validated error for this fold</span></span>
+<span id="cb101-20"><a href="#cb101-20"></a>        cv_errors[j][i] <span class="op">=</span> models_cv.loc[i][<span class="st">"RSS"</span>]</span>
+<span id="cb101-21"><a href="#cb101-21"></a></span>
+<span id="cb101-22"><a href="#cb101-22"></a>        exog <span class="op">=</span> models_cv.loc[i][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb101-23"><a href="#cb101-23"></a>        exog.remove(<span class="st">'Intercept'</span>)</span>
+<span id="cb101-24"><a href="#cb101-24"></a>        predictors <span class="op">=</span> exog</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="4ab8cc19-5c1d-432e-fa08-46e79d67c661">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb102-1"><a href="#cb102-1"></a>cv_mean <span class="op">=</span> cv_errors.<span class="bu">apply</span>(np.mean, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb102-2"><a href="#cb102-2"></a></span>
+<span id="cb102-3"><a href="#cb102-3"></a>sns.lineplot(x<span class="op">=</span><span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">20</span>), y<span class="op">=</span>cv_mean)</span>
+<span id="cb102-4"><a href="#cb102-4"></a>plt.xlabel(<span class="st">'# Predictors'</span>)</span>
+<span id="cb102-5"><a href="#cb102-5"></a>plt.ylabel(<span class="st">'CV Error'</span>)</span>
+<span id="cb102-6"><a href="#cb102-6"></a>plt.plot(cv_mean.argmin()<span class="op">+</span><span class="dv">1</span>, cv_mean.<span class="bu">min</span>(), <span class="st">"or"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-44-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Cross-validation suggest 8-predictor model is the best model. We now perform best subset selection on the full data set in order to obtain the 8-variable model.</p>
+<div class="cell" data-outputid="a67b2b8b-ba17-4b4c-8519-53fb7d589266">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb103-1"><a href="#cb103-1"></a>models_full <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">'RSS'</span>, <span class="st">'model'</span>])</span>
+<span id="cb103-2"><a href="#cb103-2"></a></span>
+<span id="cb103-3"><a href="#cb103-3"></a>predictors <span class="op">=</span> []</span>
+<span id="cb103-4"><a href="#cb103-4"></a>   </span>
+<span id="cb103-5"><a href="#cb103-5"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">9</span>):</span>
+<span id="cb103-6"><a href="#cb103-6"></a>    models_full.loc[i] <span class="op">=</span> forward(predictors, X, y, X, y) <span class="co">#use full dataset</span></span>
+<span id="cb103-7"><a href="#cb103-7"></a>    exog <span class="op">=</span> models_full.loc[i][<span class="st">'model'</span>].model.exog_names.copy()</span>
+<span id="cb103-8"><a href="#cb103-8"></a>    exog.remove(<span class="st">'Intercept'</span>)</span>
+<span id="cb103-9"><a href="#cb103-9"></a>    predictors <span class="op">=</span> exog</span>
+<span id="cb103-10"><a href="#cb103-10"></a>    <span class="bu">print</span>(i, predictors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 ['CRBI']
+2 ['CRBI', 'Hits']
+3 ['CRBI', 'Hits', 'PutOuts']
+4 ['CRBI', 'Hits', 'PutOuts', 'Division_W']
+5 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat']
+6 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks']
+7 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks']
+8 ['CRBI', 'Hits', 'PutOuts', 'Division_W', 'AtBat', 'Walks', 'CWalks', 'CRuns']</code></pre>
+</div>
+</div>
+<p>There are also other supports from <a href="http://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/">http://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/</a> and <a href="https://scikit-learn.org/stable/modules/feature_selection.html#feature-selection">https://scikit-learn.org/stable/modules/feature_selection.html#feature-selection</a> which implement different selection strategies.</p>
+</section>
+</section>
+<section id="ridge-regression-and-the-lasso" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="ridge-regression-and-the-lasso"><span class="header-section-number">6.2</span> Ridge Regression and the Lasso</h2>
+<p>The <strong>glmnet</strong> algorithms in R optimize the objective function using cyclical coordinate descent, while <code>scikit-learn</code> Ridge regression uses linear least squares with L2 regularization. They are rather different implementations, but the general principles are the same.</p>
+<p>The <strong>glmnet() function in R</strong> optimizes: ### <span class="math display">\[ \frac{1}{N}|| X\beta-y||^2_2+\lambda\bigg(\frac{1}{2}(1−\alpha)||\beta||^2_2 \ +\ \alpha||\beta||_1\bigg) \]</span> (See R documentation and <a href="https://cran.r-project.org/web/packages/glmnet/vignettes/glmnet_beta.pdf">https://cran.r-project.org/web/packages/glmnet/vignettes/glmnet_beta.pdf</a>)<br> The function supports L1 and L2 regularization. For just Ridge regression we need to use $= 0 $. This reduces the above cost function to ### <span class="math display">\[ \frac{1}{N}|| X\beta-y||^2_2+\frac{1}{2}\lambda ||\beta||^2_2 \]</span></p>
+<p>In <code>python</code>, you can also find similar functions in <a href="https://github.com/civisanalytics/python-glmnet">https://github.com/civisanalytics/python-glmnet</a></p>
+<p>The <strong>sklearn Ridge()</strong> function on the other hand optimizes: ### <span class="math display">\[ ||X\beta - y||^2_2 + \alpha ||\beta||^2_2 \]</span> which is equivalent to optimizing ### <span class="math display">\[ \frac{1}{N}||X\beta - y||^2_2 + \frac{\alpha}{N} ||\beta||^2_2 \]</span></p>
+<p>By default the <code>Ridge()</code> function performs ridge regression for an automatically selected range of <span class="math inline">\(\alpha\)</span> (or <span class="math inline">\(\lambda\)</span> in the textbook) values. However, here we have chosen to implement the function over a grid of values ranging from <span class="math inline">\(\alpha=10^{10}\)</span> to <span class="math inline">\(\alpha=10^{-2}\)</span>, essentially covering the full range of scenarios from the null model containing only the intercept, to the least squares fit. The following we plot 19 coefficients (excluding intercept) for 100 different alphas</p>
+<div class="cell" data-outputid="159c0023-cf23-4dac-cb6b-63294befc481">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb105-1"><a href="#cb105-1"></a>alphas <span class="op">=</span> <span class="dv">10</span><span class="op">**</span>np.linspace(<span class="dv">10</span>,<span class="op">-</span><span class="dv">2</span>,<span class="dv">100</span>)</span>
+<span id="cb105-2"><a href="#cb105-2"></a></span>
+<span id="cb105-3"><a href="#cb105-3"></a>ridge <span class="op">=</span> Ridge()</span>
+<span id="cb105-4"><a href="#cb105-4"></a>coefs <span class="op">=</span> []</span>
+<span id="cb105-5"><a href="#cb105-5"></a></span>
+<span id="cb105-6"><a href="#cb105-6"></a><span class="cf">for</span> a <span class="kw">in</span> alphas:</span>
+<span id="cb105-7"><a href="#cb105-7"></a>    ridge.set_params(alpha<span class="op">=</span>a)</span>
+<span id="cb105-8"><a href="#cb105-8"></a>    ridge.fit(scale(X), y) <span class="co"># We standardize features before ridge regression</span></span>
+<span id="cb105-9"><a href="#cb105-9"></a>    coefs.append(ridge.coef_)</span>
+<span id="cb105-10"><a href="#cb105-10"></a></span>
+<span id="cb105-11"><a href="#cb105-11"></a>ax <span class="op">=</span> plt.gca()</span>
+<span id="cb105-12"><a href="#cb105-12"></a>ax.plot(alphas, coefs)</span>
+<span id="cb105-13"><a href="#cb105-13"></a>ax.set_xscale(<span class="st">'log'</span>)</span>
+<span id="cb105-14"><a href="#cb105-14"></a>ax.set_xlim(ax.get_xlim()[::<span class="op">-</span><span class="dv">1</span>])  <span class="co"># reverse axis</span></span>
+<span id="cb105-15"><a href="#cb105-15"></a>plt.axis(<span class="st">'tight'</span>)</span>
+<span id="cb105-16"><a href="#cb105-16"></a>plt.xlabel(<span class="st">'alpha'</span>)</span>
+<span id="cb105-17"><a href="#cb105-17"></a>plt.ylabel(<span class="st">'weights'</span>)</span>
+<span id="cb105-18"><a href="#cb105-18"></a>plt.title(<span class="st">'Ridge coefficients as a function of the regularization'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="45">
+<pre><code>Text(0.5, 1.0, 'Ridge coefficients as a function of the regularization')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-46-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The above plot shows that the Ridge coefficients get larger when we decrease alpha. We now split the samples into a training set and a test set in order to estimate the test error of ridge regression and the lasso.</p>
+<div class="cell" data-execution_count="90">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb107-1"><a href="#cb107-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that if we had instead simply fit a model with just an intercept, we would have predicted each test observation using the mean of the training observations. In that case, we could compute the test set MSE like this:</p>
+<div class="cell" data-outputid="b9925d3d-c786-4143-8315-fd882e9a7663">
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb108-1"><a href="#cb108-1"></a>np.mean((np.mean(y_train) <span class="op">-</span> y_test)<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="47">
+<pre><code>172862.23592080915</code></pre>
+</div>
+</div>
+<p>We could also get similar result by fitting a ridge regression model with a <em>very</em> large value of <span class="math inline">\(\lambda\)</span>. Note that <code>1e10</code> means <span class="math inline">\(10^{10}\)</span>. This big penalty shrinks the coefficients to a very large degree and makes the model more biased, resulting in a higher MSE.</p>
+<div class="cell" data-outputid="30fd9842-24e9-4be0-e7a7-4727dbb196db">
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb110-1"><a href="#cb110-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb110-2"><a href="#cb110-2"></a>scaler.fit(X_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<pre><code>StandardScaler()</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="95766afd-adb5-433e-8c1c-e476376285b5">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb112-1"><a href="#cb112-1"></a>model <span class="op">=</span> Ridge()</span>
+<span id="cb112-2"><a href="#cb112-2"></a>model.set_params(alpha<span class="op">=</span><span class="dv">10</span><span class="op">**</span><span class="dv">10</span>)</span>
+<span id="cb112-3"><a href="#cb112-3"></a>X_scale <span class="op">=</span> scaler.transform(X_train)</span>
+<span id="cb112-4"><a href="#cb112-4"></a>model.fit(X_scale, y_train)</span>
+<span id="cb112-5"><a href="#cb112-5"></a>X_scale_t <span class="op">=</span> scaler.transform(X_test)</span>
+<span id="cb112-6"><a href="#cb112-6"></a>pred <span class="op">=</span> model.predict(X_scale_t)</span>
+<span id="cb112-7"><a href="#cb112-7"></a>mean_squared_error(y_test, pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="49">
+<pre><code>172862.22059245987</code></pre>
+</div>
+</div>
+<p>Next we fit a ridge regression model on the training set, and evaluate its MSE on the test set</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb114"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb114-1"><a href="#cb114-1"></a>validation_score <span class="op">=</span> []</span>
+<span id="cb114-2"><a href="#cb114-2"></a>X_scale_t <span class="op">=</span> scaler.transform(X_test)</span>
+<span id="cb114-3"><a href="#cb114-3"></a><span class="cf">for</span> alpha <span class="kw">in</span> alphas:</span>
+<span id="cb114-4"><a href="#cb114-4"></a>    model <span class="op">=</span> Ridge(alpha<span class="op">=</span>alpha)</span>
+<span id="cb114-5"><a href="#cb114-5"></a>    model.fit(X_scale,y_train) <span class="co">#compare normalize=True vs standardize</span></span>
+<span id="cb114-6"><a href="#cb114-6"></a>    validation_score.append(mean_squared_error(model.predict(X_scale_t),y_test))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-outputid="3462b910-7486-4881-fed1-e8430f7e4ad5">
+<div class="sourceCode cell-code" id="cb115"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb115-1"><a href="#cb115-1"></a>sns.lineplot(x<span class="op">=</span>alphas,y<span class="op">=</span>validation_score)</span>
+<span id="cb115-2"><a href="#cb115-2"></a>plt.xscale(<span class="st">'log'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-52-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-outputid="d3e30151-0d44-4b02-8d41-632a94993f73">
+<div class="sourceCode cell-code" id="cb116"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb116-1"><a href="#cb116-1"></a>np.argmin(validation_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="52">
+<pre><code>65</code></pre>
+</div>
+</div>
+<p>Therefore, we see that the value of alpha that results in the smallest cross-validation error is the 64th. What is the test MSE associated with this value of alpha?</p>
+<div class="cell" data-outputid="4f488dd0-a627-4936-c7ba-993ed7949241">
+<div class="sourceCode cell-code" id="cb118"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb118-1"><a href="#cb118-1"></a>alphas[<span class="dv">65</span>], validation_score[<span class="dv">65</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>(132.19411484660287, 99557.32756698191)</code></pre>
+</div>
+</div>
+<p>We can also do built-in cross-validation using <code>RidgeCV</code></p>
+<div class="cell" data-outputid="40fea59b-10cd-4770-eda4-db12352eb8c3">
+<div class="sourceCode cell-code" id="cb120"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb120-1"><a href="#cb120-1"></a>kf <span class="op">=</span> KFold(n_splits<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb120-2"><a href="#cb120-2"></a>ridgecv <span class="op">=</span> RidgeCV(alphas<span class="op">=</span>alphas, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>, cv<span class="op">=</span>kf)</span>
+<span id="cb120-3"><a href="#cb120-3"></a>ridgecv.fit(X_scale, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+<pre><code>RidgeCV(alphas=array([1.00000000e+10, 7.56463328e+09, 5.72236766e+09, 4.32876128e+09,
+       3.27454916e+09, 2.47707636e+09, 1.87381742e+09, 1.41747416e+09,
+       1.07226722e+09, 8.11130831e+08, 6.13590727e+08, 4.64158883e+08,
+       3.51119173e+08, 2.65608778e+08, 2.00923300e+08, 1.51991108e+08,
+       1.14975700e+08, 8.69749003e+07, 6.57933225e+07, 4.97702356e+07,
+       3.76493581e+07, 2.84803587e+0...
+       2.00923300e+00, 1.51991108e+00, 1.14975700e+00, 8.69749003e-01,
+       6.57933225e-01, 4.97702356e-01, 3.76493581e-01, 2.84803587e-01,
+       2.15443469e-01, 1.62975083e-01, 1.23284674e-01, 9.32603347e-02,
+       7.05480231e-02, 5.33669923e-02, 4.03701726e-02, 3.05385551e-02,
+       2.31012970e-02, 1.74752840e-02, 1.32194115e-02, 1.00000000e-02]),
+        cv=KFold(n_splits=10, random_state=2, shuffle=True),
+        scoring='neg_mean_squared_error')</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="7f66542a-a0a2-4d9d-9d3e-201f97f3f89d">
+<div class="sourceCode cell-code" id="cb122"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb122-1"><a href="#cb122-1"></a>ridgecv.alpha_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>100.0</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="f02322d5-8667-424f-e8d1-624c93622ffc">
+<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb124-1"><a href="#cb124-1"></a>model.set_params(alpha<span class="op">=</span>ridgecv.alpha_)</span>
+<span id="cb124-2"><a href="#cb124-2"></a>model.fit(X_scale, y_train)</span>
+<span id="cb124-3"><a href="#cb124-3"></a>mean_squared_error(y_test, model.predict(X_scale_t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="56">
+<pre><code>99586.56834382795</code></pre>
+</div>
+</div>
+<section id="fit-model-to-full-data-set" class="level4" data-number="6.2.0.1">
+<h4 data-number="6.2.0.1" class="anchored" data-anchor-id="fit-model-to-full-data-set"><span class="header-section-number">6.2.0.1</span> Fit model to full data set</h4>
+<div class="cell" data-outputid="a4bb403f-d61b-4e33-b580-3f43bb4a0ea4">
+<div class="sourceCode cell-code" id="cb126"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb126-1"><a href="#cb126-1"></a>model.fit(scale(X), y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="57">
+<pre><code>Ridge(alpha=100.0)</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="28da8047-de81-4195-e62a-427507b59148">
+<div class="sourceCode cell-code" id="cb128"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb128-1"><a href="#cb128-1"></a>pd.Series(model.coef_.flatten(), index<span class="op">=</span>X.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<pre><code>AtBat          -0.006619
+Hits           49.467498
+HmRun          -0.859718
+Runs           28.891970
+RBI            22.425519
+Walks          41.183554
+Years          -2.737654
+CAtBat         24.915049
+CHits          44.636902
+CHmRun         38.851734
+CRuns          45.225776
+CRBI           47.320463
+CWalks          3.558932
+PutOuts        56.671318
+Assists         7.335151
+Errors        -13.493719
+League_N       14.878188
+Division_W    -48.564908
+NewLeague_N     2.817544
+dtype: float64</code></pre>
+</div>
+</div>
+<p>As expected, none of the coefficients are zero—ridge regression does not perform variable selection!</p>
+<p>You can also fit the ridge regression with LOOCV, this should be efficient since their is corresponding shortcut equation</p>
+<div class="cell" data-outputid="7e04c0c4-8a7d-4244-c60f-9e845b1b63c4">
+<div class="sourceCode cell-code" id="cb130"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb130-1"><a href="#cb130-1"></a>ridgeloocv <span class="op">=</span> RidgeCV(alphas<span class="op">=</span>alphas, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>, gcv_mode<span class="op">=</span><span class="st">'auto'</span>)</span>
+<span id="cb130-2"><a href="#cb130-2"></a>ridgeloocv.fit(X_scale, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="59">
+<pre><code>RidgeCV(alphas=array([1.00000000e+10, 7.56463328e+09, 5.72236766e+09, 4.32876128e+09,
+       3.27454916e+09, 2.47707636e+09, 1.87381742e+09, 1.41747416e+09,
+       1.07226722e+09, 8.11130831e+08, 6.13590727e+08, 4.64158883e+08,
+       3.51119173e+08, 2.65608778e+08, 2.00923300e+08, 1.51991108e+08,
+       1.14975700e+08, 8.69749003e+07, 6.57933225e+07, 4.97702356e+07,
+       3.76493581e+07, 2.84803587e+0...
+       2.00923300e+00, 1.51991108e+00, 1.14975700e+00, 8.69749003e-01,
+       6.57933225e-01, 4.97702356e-01, 3.76493581e-01, 2.84803587e-01,
+       2.15443469e-01, 1.62975083e-01, 1.23284674e-01, 9.32603347e-02,
+       7.05480231e-02, 5.33669923e-02, 4.03701726e-02, 3.05385551e-02,
+       2.31012970e-02, 1.74752840e-02, 1.32194115e-02, 1.00000000e-02]),
+        gcv_mode='auto', scoring='neg_mean_squared_error')</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="c942de4c-3213-4faa-e311-3edaebf735a3">
+<div class="sourceCode cell-code" id="cb132"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb132-1"><a href="#cb132-1"></a>ridgeloocv.alpha_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="60">
+<pre><code>75.64633275546291</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="ec9ef5c7-3344-4d4c-afec-a0a602f05f9c">
+<div class="sourceCode cell-code" id="cb134"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb134-1"><a href="#cb134-1"></a>model.set_params(alpha<span class="op">=</span>ridgeloocv.alpha_)</span>
+<span id="cb134-2"><a href="#cb134-2"></a>model.fit(X_scale, y_train)</span>
+<span id="cb134-3"><a href="#cb134-3"></a>mean_squared_error(y_test, model.predict(X_scale_t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="61">
+<pre><code>99820.74305168974</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="d183a8c8-b0dd-4c74-bef0-0917d6cf28c9">
+<div class="sourceCode cell-code" id="cb136"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb136-1"><a href="#cb136-1"></a>model.fit(scale(X), y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="62">
+<pre><code>Ridge(alpha=75.64633275546291)</code></pre>
+</div>
+</div>
+</section>
+<section id="the-lasso" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="the-lasso"><span class="header-section-number">6.2.1</span> The Lasso</h3>
+<p>We saw that ridge regression with a wise choice of alpha may outperform least squares as well as the null model on the <code>Hitters</code> data set. We now ask whether the lasso can yield either a more accurate or a more interpretable model than ridge regression. The following we plot 19 coefficients (excluding intercept) for 100 different alphas.</p>
+<div class="cell" data-outputid="b235ab23-c823-46ab-cff6-f10fc122f55a">
+<div class="sourceCode cell-code" id="cb138"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb138-1"><a href="#cb138-1"></a>lasso <span class="op">=</span> Lasso(max_iter<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb138-2"><a href="#cb138-2"></a>coefs <span class="op">=</span> []</span>
+<span id="cb138-3"><a href="#cb138-3"></a></span>
+<span id="cb138-4"><a href="#cb138-4"></a><span class="cf">for</span> a <span class="kw">in</span> alphas:</span>
+<span id="cb138-5"><a href="#cb138-5"></a>    lasso.set_params(alpha<span class="op">=</span>a)</span>
+<span id="cb138-6"><a href="#cb138-6"></a>    lasso.fit(scale(X_train), y_train)</span>
+<span id="cb138-7"><a href="#cb138-7"></a>    coefs.append(lasso.coef_)</span>
+<span id="cb138-8"><a href="#cb138-8"></a></span>
+<span id="cb138-9"><a href="#cb138-9"></a>ax <span class="op">=</span> plt.gca()</span>
+<span id="cb138-10"><a href="#cb138-10"></a>ax.plot(alphas, coefs)</span>
+<span id="cb138-11"><a href="#cb138-11"></a>ax.set_xscale(<span class="st">'log'</span>)</span>
+<span id="cb138-12"><a href="#cb138-12"></a>ax.set_xlim(ax.get_xlim()[::<span class="op">-</span><span class="dv">1</span>])  <span class="co"># reverse axis</span></span>
+<span id="cb138-13"><a href="#cb138-13"></a>plt.axis(<span class="st">'tight'</span>)</span>
+<span id="cb138-14"><a href="#cb138-14"></a>plt.xlabel(<span class="st">'alpha'</span>)</span>
+<span id="cb138-15"><a href="#cb138-15"></a>plt.ylabel(<span class="st">'weights'</span>)</span>
+<span id="cb138-16"><a href="#cb138-16"></a>plt.title(<span class="st">'Lasso coefficients as a function of the regularization'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-64-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can see from the coefficient plot that depending on the choice of tuning parameter, some of the coefficients will be exactly equal to zero. We now perform cross-validation and compute the associated test error.</p>
+<div class="cell" data-outputid="5c911aba-e42d-4afb-a961-2f097bdd1182">
+<div class="sourceCode cell-code" id="cb139"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb139-1"><a href="#cb139-1"></a>kf <span class="op">=</span> KFold(n_splits<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb139-2"><a href="#cb139-2"></a>lassocv <span class="op">=</span> LassoCV(alphas<span class="op">=</span><span class="va">None</span>, cv<span class="op">=</span>kf, max_iter<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb139-3"><a href="#cb139-3"></a>lassocv.fit(X_scale, y_train.values.ravel())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="64">
+<pre><code>LassoCV(cv=KFold(n_splits=10, random_state=2, shuffle=True), max_iter=10000)</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="ea4f23da-dc33-46b0-c66f-7e2b37c0333f">
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb141-1"><a href="#cb141-1"></a>lassocv.alpha_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="65">
+<pre><code>25.649654020305032</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="880873ee-ef5a-4151-b44c-3433106577fb">
+<div class="sourceCode cell-code" id="cb143"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb143-1"><a href="#cb143-1"></a>lasso.set_params(alpha<span class="op">=</span>lassocv.alpha_)</span>
+<span id="cb143-2"><a href="#cb143-2"></a>lasso.fit(X_scale, y_train)</span>
+<span id="cb143-3"><a href="#cb143-3"></a>mean_squared_error(y_test, lasso.predict(X_scale_t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="66">
+<pre><code>104853.47279766494</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="4b8c1577-8343-4a90-f837-11d7d4fe6a63">
+<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb145-1"><a href="#cb145-1"></a><span class="co"># fit the full model</span></span>
+<span id="cb145-2"><a href="#cb145-2"></a>lasso.fit(scale(X), y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="67">
+<pre><code>Lasso(alpha=25.649654020305032, max_iter=10000)</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="9c79a4bd-2375-44c1-b15f-debe69b6e5f4">
+<div class="sourceCode cell-code" id="cb147"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb147-1"><a href="#cb147-1"></a><span class="co"># Some of the coefficients are now reduced to exactly zero.</span></span>
+<span id="cb147-2"><a href="#cb147-2"></a>pd.Series(lasso.coef_, index<span class="op">=</span>X.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="68">
+<pre><code>AtBat            0.000000
+Hits            80.723891
+HmRun            0.000000
+Runs             0.000000
+RBI              0.000000
+Walks           45.833055
+Years            0.000000
+CAtBat           0.000000
+CHits            0.000000
+CHmRun           0.000000
+CRuns           65.022016
+CRBI           129.889483
+CWalks           0.000000
+PutOuts         55.241441
+Assists         -0.000000
+Errors          -0.000000
+League_N         0.000000
+Division_W     -43.731588
+NewLeague_N      0.000000
+dtype: float64</code></pre>
+</div>
+</div>
+<p>The test set MSE is very similar to the test MSE of ridge regression with <span class="math inline">\(\alpha\)</span> chosen by cross-validation.</p>
+<p>However, the lasso has a substantial advantage over ridge regression in that the resulting coefficient estimates are sparse. Here we see that 13 of the 19 coefficient estimates are exactly zero. So the lasso model with <span class="math inline">\(\alpha\)</span> chosen by cross-validation contains only six variables.</p>
+</section>
+</section>
+<section id="pcr-and-pls-regression" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="pcr-and-pls-regression"><span class="header-section-number">6.3</span> PCR and PLS Regression</h2>
+<section id="principal-components-regression" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="principal-components-regression"><span class="header-section-number">6.3.1</span> Principal Components Regression</h3>
+<p>Principal components regression (PCR) can be performed using the <code>pca</code> function. We now apply PCR to the <code>Hitters</code> data, in order to predict <code>Salary</code>. Again, we ensure that the missing values have been removed from the data, as described in Section 6.5.1.</p>
+<div class="cell" data-outputid="8d414f82-578b-422c-f4a5-9756f8ccacb9">
+<div class="sourceCode cell-code" id="cb149"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb149-1"><a href="#cb149-1"></a>pca <span class="op">=</span> PCA()</span>
+<span id="cb149-2"><a href="#cb149-2"></a>X_reduced <span class="op">=</span> pca.fit_transform(scale(X)) <span class="co">#standardize before PCA</span></span>
+<span id="cb149-3"><a href="#cb149-3"></a></span>
+<span id="cb149-4"><a href="#cb149-4"></a><span class="bu">print</span>(pca.components_.shape)</span>
+<span id="cb149-5"><a href="#cb149-5"></a>pd.DataFrame(pca.components_.T).loc[:<span class="dv">4</span>,:<span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(19, 19)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="69">
+
+  <div id="df-7e0f3cdd-8a3b-402c-952a-38a572db322a">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0.198290</td>
+<td>-0.383784</td>
+<td>0.088626</td>
+<td>0.031967</td>
+<td>0.028117</td>
+<td>-0.070646</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0.195861</td>
+<td>-0.377271</td>
+<td>0.074032</td>
+<td>0.017982</td>
+<td>-0.004652</td>
+<td>-0.082240</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.204369</td>
+<td>-0.237136</td>
+<td>-0.216186</td>
+<td>-0.235831</td>
+<td>0.077660</td>
+<td>-0.149646</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0.198337</td>
+<td>-0.377721</td>
+<td>-0.017166</td>
+<td>-0.049942</td>
+<td>-0.038536</td>
+<td>-0.136660</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.235174</td>
+<td>-0.314531</td>
+<td>-0.073085</td>
+<td>-0.138985</td>
+<td>0.024299</td>
+<td>-0.111675</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-7e0f3cdd-8a3b-402c-952a-38a572db322a')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-7e0f3cdd-8a3b-402c-952a-38a572db322a button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-7e0f3cdd-8a3b-402c-952a-38a572db322a');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<div class="cell" data-outputid="fc6b7f42-1fce-4d19-8e72-ec1a8dc02dab">
+<div class="sourceCode cell-code" id="cb151"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb151-1"><a href="#cb151-1"></a><span class="bu">print</span>(X_reduced.shape)</span>
+<span id="cb151-2"><a href="#cb151-2"></a>pd.DataFrame(X_reduced).loc[:<span class="dv">4</span>,:<span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(263, 19)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="70">
+
+  <div id="df-bf1e4a5f-bebc-4ce3-9f71-7e2794131455">
+    <div class="colab-df-container">
+      <div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-0.009649</td>
+<td>1.870522</td>
+<td>1.265145</td>
+<td>-0.935481</td>
+<td>1.109636</td>
+<td>1.211972</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0.411434</td>
+<td>-2.429422</td>
+<td>-0.909193</td>
+<td>-0.264212</td>
+<td>1.232031</td>
+<td>1.826617</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3.466822</td>
+<td>0.825947</td>
+<td>0.555469</td>
+<td>-1.616726</td>
+<td>-0.857488</td>
+<td>-1.028712</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>-2.558317</td>
+<td>-0.230984</td>
+<td>0.519642</td>
+<td>-2.176251</td>
+<td>-0.820301</td>
+<td>1.491696</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1.027702</td>
+<td>-1.573537</td>
+<td>1.331382</td>
+<td>3.494004</td>
+<td>0.983427</td>
+<td>0.513675</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+      <button class="colab-df-convert" onclick="convertToInteractive('df-bf1e4a5f-bebc-4ce3-9f71-7e2794131455')" title="Convert this dataframe to an interactive table." style="display:none;">
+        
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewbox="0 0 24 24" width="24px">
+    <path d="M0 0h24v24H0V0z" fill="none"></path>
+    <path d="M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z"></path><path d="M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z"></path>
+  </svg>
+      </button>
+      
+  <style>
+    .colab-df-container {
+      display:flex;
+      flex-wrap:wrap;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+      <script>
+        const buttonEl =
+          document.querySelector('#df-bf1e4a5f-bebc-4ce3-9f71-7e2794131455 button.colab-df-convert');
+        buttonEl.style.display =
+          google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+        async function convertToInteractive(key) {
+          const element = document.querySelector('#df-bf1e4a5f-bebc-4ce3-9f71-7e2794131455');
+          const dataTable =
+            await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                     [key], {});
+          if (!dataTable) return;
+
+          const docLinkHtml = 'Like what you see? Visit the ' +
+            '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+            + ' to learn more about interactive tables.';
+          element.innerHTML = '';
+          dataTable['output_type'] = 'display_data';
+          await google.colab.output.renderOutput(dataTable, element);
+          const docLink = document.createElement('div');
+          docLink.innerHTML = docLinkHtml;
+          element.appendChild(docLink);
+        }
+      </script>
+    </div>
+  </div>
+  
+</div>
+</div>
+<div class="cell" data-outputid="67877bc2-067e-4700-cf24-d00abbe4d05e">
+<div class="sourceCode cell-code" id="cb153"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb153-1"><a href="#cb153-1"></a><span class="co"># Variance explained by the principal components</span></span>
+<span id="cb153-2"><a href="#cb153-2"></a>np.cumsum(np.<span class="bu">round</span>(pca.explained_variance_ratio_, decimals<span class="op">=</span><span class="dv">4</span>)<span class="op">*</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="71">
+<pre><code>array([38.31, 60.15, 70.84, 79.03, 84.29, 88.63, 92.26, 94.96, 96.28,
+       97.25, 97.97, 98.64, 99.14, 99.46, 99.73, 99.88, 99.95, 99.98,
+       99.99])</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="8a935869-59c1-4158-95d7-1a2f2ddaa5bd">
+<div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb155-1"><a href="#cb155-1"></a>plt.plot(np.cumsum(pca.explained_variance_ratio_)) <span class="co">#scree plot</span></span>
+<span id="cb155-2"><a href="#cb155-2"></a>plt.xlabel(<span class="st">'number of components'</span>)</span>
+<span id="cb155-3"><a href="#cb155-3"></a>plt.ylabel(<span class="st">'cumulative explained variance'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-73-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<section id="fitting-pca-with-training-data" class="level4" data-number="6.3.1.1">
+<h4 data-number="6.3.1.1" class="anchored" data-anchor-id="fitting-pca-with-training-data"><span class="header-section-number">6.3.1.1</span> Fitting PCA with training data</h4>
+<p>In this method, we use the train/val/test split scheme like the lab in the textbook</p>
+<div class="cell" data-outputid="a9c03178-d854-40d5-a1cc-cbc768953a0d">
+<div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb156-1"><a href="#cb156-1"></a>pca2 <span class="op">=</span> PCA()</span>
+<span id="cb156-2"><a href="#cb156-2"></a>X_reduced_train <span class="op">=</span> pca2.fit_transform(X_scale)</span>
+<span id="cb156-3"><a href="#cb156-3"></a>n <span class="op">=</span> <span class="bu">len</span>(X_reduced_train)</span>
+<span id="cb156-4"><a href="#cb156-4"></a></span>
+<span id="cb156-5"><a href="#cb156-5"></a><span class="co"># 10-fold CV, with shuffle</span></span>
+<span id="cb156-6"><a href="#cb156-6"></a>kf_10 <span class="op">=</span> KFold(n_splits<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb156-7"><a href="#cb156-7"></a></span>
+<span id="cb156-8"><a href="#cb156-8"></a>mse <span class="op">=</span> []</span>
+<span id="cb156-9"><a href="#cb156-9"></a>regr <span class="op">=</span> LinearRegression()</span>
+<span id="cb156-10"><a href="#cb156-10"></a><span class="co"># Calculate MSE with only the intercept (no principal components in regression) </span></span>
+<span id="cb156-11"><a href="#cb156-11"></a>score <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">*</span>cross_val_score(regr, np.ones((n,<span class="dv">1</span>)), y_train, cv<span class="op">=</span>kf_10, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>).mean()    </span>
+<span id="cb156-12"><a href="#cb156-12"></a>mse.append(score)</span>
+<span id="cb156-13"><a href="#cb156-13"></a></span>
+<span id="cb156-14"><a href="#cb156-14"></a><span class="co"># Calculate MSE using CV for the 19 principle components, adding one component at the time.</span></span>
+<span id="cb156-15"><a href="#cb156-15"></a><span class="cf">for</span> i <span class="kw">in</span> np.arange(<span class="dv">1</span>, <span class="dv">20</span>):</span>
+<span id="cb156-16"><a href="#cb156-16"></a>    score <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">*</span>cross_val_score(regr, X_reduced_train[:,:i], y_train, cv<span class="op">=</span>kf_10, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>).mean()</span>
+<span id="cb156-17"><a href="#cb156-17"></a>    mse.append(score)</span>
+<span id="cb156-18"><a href="#cb156-18"></a></span>
+<span id="cb156-19"><a href="#cb156-19"></a>plt.plot(np.arange(<span class="dv">0</span>, <span class="dv">20</span>), np.array(mse), <span class="st">'-v'</span>)</span>
+<span id="cb156-20"><a href="#cb156-20"></a>plt.xlabel(<span class="st">'Number of principal components in regression'</span>)</span>
+<span id="cb156-21"><a href="#cb156-21"></a>plt.ylabel(<span class="st">'MSE'</span>)</span>
+<span id="cb156-22"><a href="#cb156-22"></a>plt.title(<span class="st">'Salary'</span>)</span>
+<span id="cb156-23"><a href="#cb156-23"></a>plt.xlim(xmin<span class="op">=-</span><span class="dv">1</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-74-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-outputid="62c40920-5f48-4617-ae3d-bd82fd112220">
+<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb157-1"><a href="#cb157-1"></a>np.array(mse).argmin() <span class="co">#note mse contains no pc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="74">
+<pre><code>6</code></pre>
+</div>
+</div>
+</section>
+<section id="transform-test-data-with-pca-loadings-and-fit-regression-on-6-principal-components" class="level4" data-number="6.3.1.2">
+<h4 data-number="6.3.1.2" class="anchored" data-anchor-id="transform-test-data-with-pca-loadings-and-fit-regression-on-6-principal-components"><span class="header-section-number">6.3.1.2</span> Transform test data with PCA loadings and fit regression on 6 principal components</h4>
+<div class="cell" data-outputid="01b7ba76-2256-4017-a5cb-26a925241a8b" data-execution_count="103">
+<div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb159-1"><a href="#cb159-1"></a>X_reduced_test <span class="op">=</span> pca2.transform(X_scale_t)[:,:<span class="dv">6</span>]</span>
+<span id="cb159-2"><a href="#cb159-2"></a></span>
+<span id="cb159-3"><a href="#cb159-3"></a><span class="co"># Train regression model on training data </span></span>
+<span id="cb159-4"><a href="#cb159-4"></a>regr <span class="op">=</span> LinearRegression()</span>
+<span id="cb159-5"><a href="#cb159-5"></a>regr.fit(X_reduced_train[:,:<span class="dv">6</span>], y_train)</span>
+<span id="cb159-6"><a href="#cb159-6"></a></span>
+<span id="cb159-7"><a href="#cb159-7"></a><span class="co"># Prediction with test data</span></span>
+<span id="cb159-8"><a href="#cb159-8"></a>pred <span class="op">=</span> regr.predict(X_reduced_test)</span>
+<span id="cb159-9"><a href="#cb159-9"></a>mean_squared_error(y_test, pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="103">
+<pre><code>108195.77957462525</code></pre>
+</div>
+</div>
+<div class="cell" data-outputid="e94f57b3-a8f4-4187-faa9-40826fc3215a" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb161-1"><a href="#cb161-1"></a><span class="co"># Fit regression model on the whole data </span></span>
+<span id="cb161-2"><a href="#cb161-2"></a>regr <span class="op">=</span> LinearRegression()</span>
+<span id="cb161-3"><a href="#cb161-3"></a>regr.fit(X_reduced[:,:<span class="dv">6</span>], y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="95">
+<pre><code>LinearRegression()</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="partial-least-squares" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="partial-least-squares"><span class="header-section-number">6.3.2</span> Partial Least Squares</h3>
+<p>Scikit-learn <code>PLSRegression</code> gives same results as the pls package in R when using ‘method=’oscorespls’.<br>
+See documentation: <a href="http://scikit-learn.org/dev/modules/generated/sklearn.cross_decomposition.PLSRegression.html#sklearn.cross_decomposition.PLSRegression">http://scikit-learn.org/dev/modules/generated/sklearn.cross_decomposition.PLSRegression.html#sklearn.cross_decomposition.PLSRegression</a>.</p>
+<div class="cell" data-outputid="ab73a5e4-3417-4fdb-f993-529ab903231f">
+<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb163-1"><a href="#cb163-1"></a>n <span class="op">=</span> <span class="bu">len</span>(X_train)</span>
+<span id="cb163-2"><a href="#cb163-2"></a></span>
+<span id="cb163-3"><a href="#cb163-3"></a><span class="co"># 10-fold CV, with shuffle</span></span>
+<span id="cb163-4"><a href="#cb163-4"></a>kf_10 <span class="op">=</span> KFold(n_splits<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb163-5"><a href="#cb163-5"></a></span>
+<span id="cb163-6"><a href="#cb163-6"></a>mse <span class="op">=</span> []</span>
+<span id="cb163-7"><a href="#cb163-7"></a></span>
+<span id="cb163-8"><a href="#cb163-8"></a>score <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">*</span>cross_val_score(regr, np.ones((n,<span class="dv">1</span>)), y_train, cv<span class="op">=</span>kf_10, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>).mean()    </span>
+<span id="cb163-9"><a href="#cb163-9"></a>mse.append(score)</span>
+<span id="cb163-10"><a href="#cb163-10"></a></span>
+<span id="cb163-11"><a href="#cb163-11"></a><span class="cf">for</span> i <span class="kw">in</span> np.arange(<span class="dv">1</span>, <span class="dv">20</span>):</span>
+<span id="cb163-12"><a href="#cb163-12"></a>    pls <span class="op">=</span> PLSRegression(n_components<span class="op">=</span>i)</span>
+<span id="cb163-13"><a href="#cb163-13"></a>    score <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">*</span>cross_val_score(pls, X_scale, y_train, cv<span class="op">=</span>kf_10, scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>).mean()</span>
+<span id="cb163-14"><a href="#cb163-14"></a>    mse.append(score)</span>
+<span id="cb163-15"><a href="#cb163-15"></a></span>
+<span id="cb163-16"><a href="#cb163-16"></a>plt.plot(np.arange(<span class="dv">0</span>, <span class="dv">20</span>), np.array(mse), <span class="st">'-v'</span>)</span>
+<span id="cb163-17"><a href="#cb163-17"></a>plt.xlabel(<span class="st">'Number of principal components in regression'</span>)</span>
+<span id="cb163-18"><a href="#cb163-18"></a>plt.ylabel(<span class="st">'MSE'</span>)</span>
+<span id="cb163-19"><a href="#cb163-19"></a>plt.title(<span class="st">'Salary'</span>)</span>
+<span id="cb163-20"><a href="#cb163-20"></a>plt.xlim(xmin<span class="op">=-</span><span class="dv">1</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="Chapter_6_Lab_files/figure-html/cell-78-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-outputid="2911a606-6efc-4f2d-a7ff-d948abebecdd">
+<div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb164-1"><a href="#cb164-1"></a>np.array(mse).argmin()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="78">
+<pre><code>1</code></pre>
+</div>
+</div>
+<p>The lowest cross-validation error occurs when only <span class="math inline">\(M=1\)</span> partial least squares directions are used. We now evaluate the corresponding test set MSE.</p>
+<div class="cell" data-outputid="ba6d3dcd-889d-4a8c-d2ed-11774bb32a83">
+<div class="sourceCode cell-code" id="cb166"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb166-1"><a href="#cb166-1"></a>pls <span class="op">=</span> PLSRegression(n_components<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb166-2"><a href="#cb166-2"></a>pls.fit(X_scale, y_train)</span>
+<span id="cb166-3"><a href="#cb166-3"></a></span>
+<span id="cb166-4"><a href="#cb166-4"></a>mean_squared_error(y_test, pls.predict(X_scale_t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="79">
+<pre><code>101462.13107757183</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./Chapter_5_Lab.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling methods</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./Chapter_7_Lab.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Non-linear Modeling</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

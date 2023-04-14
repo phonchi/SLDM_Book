@@ -1,0 +1,14 @@
+# Preface {.unnumbered}
+This is the companion book for the course [Statistical Learning and Data Mining](https://phonchi.github.io/nsysu-math524/) open in the Department of Applied Mathematics, National Sun Yat-sen University.
+Statistical learning refers to a set of tools for modeling and understanding complex datasets. It is a recently developed area in statistics and blends with parallel developments in computer science and, in particular, machine learning. 
+We cover how to use machine learning techniques and statistics with the goal of statistical inference: drawing conclusions on the data at hand. 
+The book encompasses many methods such as regression, classification, regression trees, boosting, support vector machines, clustering and dimension reduction.
+
+The book is based on several well-known books and resources, including:
+
+- [An Introduction to Statistical Learning, Second Edition](https://www.statlearning.com/)
+- [The Elements of Statistical Learning, Second Edition](https://hastie.su.domains/ElemStatLearn/)
+
+If you would like to review basics about Python, you may refer to
+
+- [Computer Programming](https://phonchi.github.io/Computer_Programming/)

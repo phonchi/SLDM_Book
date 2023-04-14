@@ -1,0 +1,31 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  page-navigation: true
+  title: "Statistical Learning and Data Mining"
+  author: "phonchi"
+  date: "09/05/2022"
+  chapters:
+        - index.qmd 
+        - Chapter1_Lab.ipynb
+        - Chapter 2_Lab.ipynb
+        - Chapter_3_Lab.ipynb
+        - Chapter_4_Lab.ipynb
+        - Chapter_5_Lab.ipynb
+        - Chapter_6_Lab.ipynb
+        - Chapter_7_Lab.ipynb
+        - Chapter_8_Lab.ipynb
+        - Chapter_9_Lab.ipynb
+        - Chapter_12_Lab.ipynb
+  appendices:
+        - NumPy_tutorial.ipynb
+        - Colab_tutorial.ipynb
+        - kaggle-explore.ipynb
+  search:
+    location: sidebar
+format:
+  html:
+    theme: cosmo
+    cover-image: cover.jpg
